@@ -1,0 +1,34 @@
+<template>
+    <v-container>
+        <v-row>
+            <v-col cols="12">
+                <h1 class="display-1">An geführter Einrichtung teilnehmen</h1>
+                <p class="body-1">Die geführte Einrichtung wird in wenigen Sekunden automatisch gestartet. Sie müssen
+                    nichts unternehmen.</p>
+            </v-col>
+            <v-col cols="12" class="text-center">
+                <v-progress-circular indeterminate/>
+            </v-col>
+        </v-row>
+    </v-container>
+</template>
+
+<script lang="ts">
+    import {Vue, Component, Prop} from "vue-property-decorator";
+
+    @Component
+    export default class JoinSession extends Vue {
+        @Prop({required: true}) readonly participantId!: string;
+
+        mounted() {
+            setTimeout(() => {
+                this.joinSession();
+            }, 2000)
+        }
+
+        joinSession() {
+            this.$store.dispatch('signalR/joinSessionAsParticipant', this.participantId);
+        }
+    }
+
+</script>
