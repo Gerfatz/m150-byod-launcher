@@ -23,3 +23,9 @@ export interface TargetResultData {
     success: boolean,
     details: string,
 }
+
+export type ParticipantCreationObject = {
+    displayName: string,
+    username: string,
+    password: string,
+}

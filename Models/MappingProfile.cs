@@ -9,7 +9,19 @@ namespace ByodLauncher.Models
         public MappingProfile()
         {
             CreateMap<Director, DirectorDto>().ReverseMap();
+
             CreateMap<Session, SessionDto>().ReverseMap();
+            CreateMap<Session, SessionJoinRequestDto>()
+                .ForMember(
+                    joinRequestDto => joinRequestDto.RequiresCredentials,
+                    opt => opt.MapFrom(
+                        session => session.Stages
+                            .SelectMany(stage => stage.StageTargets)
+                            .Select(stageTarget => stageTarget.Target)
+                            .Any(target => target.RequiresCredentials)
+                    )
+                );
+
             CreateMap<Stage, StageDto>().ReverseMap();
 
             CreateMap<Target, TargetDto>()

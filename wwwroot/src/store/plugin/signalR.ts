@@ -23,8 +23,11 @@ export default function createSignalRPlugin() {
                 })
         });
 
-        client.on('JoinSession', (sessionId: Id, participantId: Id) => {
+        client.on('JoinSession', (sessionId: Id, participantId: Id, displayName: string) => {
             store.dispatch('attendSession/setParticipantId', participantId)
+                .then(() => {
+                    store.dispatch('attendSession/setDisplayName', displayName);
+                })
                 .then(() => {
                     store.dispatch('attendSession/downloadSessionData', sessionId)
                         .then(() => {
@@ -73,7 +76,7 @@ export default function createSignalRPlugin() {
                         client.invoke('StartSession', mutation.payload);
                         break;
                     case 'signalR/JOIN_SESSION':
-                        client.invoke('JoinSession', state.signalR.sessionId, state.signalR.displayName);
+                        client.invoke('JoinSession', ...mutation.payload);
                         break;
                     case 'signalR/JOIN_SESSION_AS_PARTICIPANT':
                         client.invoke('JoinSessionAsParticipant', state.signalR.participantId);

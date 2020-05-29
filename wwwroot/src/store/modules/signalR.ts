@@ -36,8 +36,8 @@ const actions = {
         commit('START_SESSION', sessionId);
     },
 
-    joinSession({commit}, {sessionId, displayName}: { sessionId: Id; displayName: string }) {
-        commit('JOIN_SESSION', {sessionId, displayName});
+    joinSession({commit}, {sessionId, displayName, username, password}: { sessionId: Id; displayName: string; username: string; password: string }) {
+        commit('JOIN_SESSION', {sessionId, displayName, username, password});
     },
 
     joinSessionAsParticipant({commit}, participantId: Id) {

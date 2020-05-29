@@ -35,9 +35,6 @@ namespace ByodLauncher.Controllers
             }
 
             return BadRequest();
-
-            // Process uploaded files
-            // Don't rely on or trust the FileName property without validation.
         }
     }
 }

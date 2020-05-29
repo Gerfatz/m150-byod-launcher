@@ -1,7 +1,7 @@
 <template>
     <v-dialog
             v-model="showDialog"
-            width="500"
+            width="700"
     >
         <template v-slot:activator="{ on }">
             <v-btn small
@@ -14,46 +14,51 @@
         </template>
 
         <v-card>
-            <v-card-title class="headline"
-                          primary-title
-            >
-                Schritt hinzufügen
+            <v-card-title>
+                <h3 class="display-1 mt-5 primary--text">Schritt hinzufügen</h3>
             </v-card-title>
 
             <v-card-text>
-                <p>Wählen Sie Schritte aus, um diese zur aktuellen Stufe hinzuzufügen.</p>
+                <p class="body-2">Wählen Sie Schritte aus, um diese zur aktuellen Stufe hinzuzufügen.</p>
             </v-card-text>
 
-            <v-list two-line
-                    flat
-            >
-                <v-list-item-group v-model="selectedTargets"
-                                   multiple
-                >
-                    <v-list-item v-for="target in availableTargets(stage)"
-                                 :key="target.id"
-                                 :value="target.id">
-                        <template v-slot:default="{active, toggle}">
-                            <v-list-item-action>
-                                <v-checkbox :input-value="active"
-                                            :true-value="target.id"
-                                            @click="toggle"
-                                ></v-checkbox>
-                            </v-list-item-action>
+            <v-card-text>
+                <v-list two-line flat>
+                    <v-list-item-group v-model="selectedTargets" multiple>
+                        <v-list-item v-for="target in availableTargets(stage)"
+                                     :key="target.id"
+                                     :value="target.id">
+                            <template v-slot:default="{active, toggle}">
+                                <v-list-item-action>
+                                    <v-checkbox :input-value="active"
+                                                :true-value="target.id"
+                                                @click="toggle"
+                                    ></v-checkbox>
+                                </v-list-item-action>
 
-                            <v-list-item-content>
-                                <v-list-item-title>{{target.title}}</v-list-item-title>
-                                <v-list-item-subtitle>{{target.description}}</v-list-item-subtitle>
-                            </v-list-item-content>
+                                <v-list-item-content>
+                                    <v-list-item-title>{{target.title}}</v-list-item-title>
+                                    <v-list-item-subtitle>{{target.description}}</v-list-item-subtitle>
+                                </v-list-item-content>
 
-                            <v-list-item-icon>
-                                <v-icon dense color="blue" v-text="'fa-scroll'"></v-icon>
-                            </v-list-item-icon>
-                        </template>
+                                <v-list-item-icon>
+                                    <v-img v-if="isScriptTarget(target)"
+                                           src="@/assets/icons/scriptTarget.svg"
+                                           max-width="30"
+                                           max-height="30"
+                                    />
+                                    <v-img v-if="isTutorialTarget(target)"
+                                           src="@/assets/icons/tutorialTarget.svg"
+                                           max-width="30"
+                                           max-height="30"
+                                    />
+                                </v-list-item-icon>
+                            </template>
 
-                    </v-list-item>
-                </v-list-item-group>
-            </v-list>
+                        </v-list-item>
+                    </v-list-item-group>
+                </v-list>
+            </v-card-text>
 
             <v-divider></v-divider>
 
@@ -78,12 +83,14 @@
     </v-dialog>
 </template>
 
-<script>
+<script lang="ts">
     import Vue from 'vue';
     import Component from "vue-class-component";
     import {mapGetters} from "vuex";
     import {Prop} from "vue-property-decorator";
     import {StageTarget} from "@/models/stageTarget";
+    import {Target} from "@/models/target";
+    import {Stage} from "@/models/stage";
 
     @Component({
         computed: {
@@ -93,14 +100,14 @@
         }
     })
     export default class AddTargetDialog extends Vue {
-        @Prop() stage;
+        @Prop() stage!: Stage;
 
         showDialog = false;
         selectedTargets = [];
 
         confirm() {
             const stage = this.stage;
-            const promises = [];
+            const promises: Promise<any>[] = [];
             this.selectedTargets.forEach(targetId => {
                 const stageTarget = new StageTarget({stageId: stage.id, targetId});
                 promises.push(this.$store.dispatch('stage/addTarget', stageTarget));
@@ -110,6 +117,14 @@
                 this.showDialog = false;
                 this.selectedTargets.splice(0, this.selectedTargets.length);
             })
+        }
+
+        isScriptTarget(target: Target) {
+            return Object.prototype.hasOwnProperty.call(target, 'script');
+        }
+
+        isTutorialTarget(target: Target) {
+            return !this.isScriptTarget(target);
         }
     }
 </script>

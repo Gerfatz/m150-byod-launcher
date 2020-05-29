@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ByodLauncher.Models;
 using ByodLauncher.Models.Dto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Routing;
 
 namespace ByodLauncher.Controllers
 {
@@ -54,9 +54,7 @@ namespace ByodLauncher.Controllers
             return _mapper.Map<TargetDto>(target);
         }
 
-        // PUT: api/Target/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
-        // more details see https://aka.ms/RazorPagesCRUD.
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTarget(Guid id, TargetDto targetDto)
         {
@@ -85,7 +83,7 @@ namespace ByodLauncher.Controllers
             return NoContent();
         }
 
-        // POST: api/Target
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult<TargetDto>> PostTarget(TargetDto targetDto)
         {
@@ -102,7 +100,7 @@ namespace ByodLauncher.Controllers
             return CreatedAtAction("GetTarget", new {id = target.Id}, _mapper.Map<TargetDto>(target));
         }
 
-        // DELETE: api/Target/5
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<ActionResult<TargetDto>> DeleteTarget(Guid id)
         {
@@ -129,9 +127,8 @@ namespace ByodLauncher.Controllers
 
             var script = target.Script
                 .Replace("PARTICIPANT_ID", HttpContext.Session.GetString("participantId"))
-                .Replace("TARGET_ID", target.Id.ToString());
-
-            // TODO: Replace RESPONSE_URL
+                .Replace("TARGET_ID", target.Id.ToString())
+                .Replace("RESPONSE_URL", GetResponseUrl());
 
             if (target.RequiresCredentials)
             {
@@ -140,15 +137,28 @@ namespace ByodLauncher.Controllers
                     .Replace("PASSWORD", HttpContext.Session.GetString("password"));
             }
 
+            var fileName = new StringBuilder(target.Title);
+            foreach (var invalidChar in System.IO.Path.GetInvalidFileNameChars())
+            {
+                fileName.Replace(invalidChar, '_');
+            }
+
             var scriptContent = Encoding.ASCII.GetBytes(script);
             var contentType = "APPLICATION/octet-stream";
-            var fileName = "script.ps1";
-            return File(scriptContent, contentType, fileName);
+            return File(scriptContent, contentType, $"{fileName}.ps1");
         }
 
         private bool TargetExists(Guid id)
         {
             return _context.Targets.Any(e => e.Id == id);
+        }
+
+        private string GetResponseUrl()
+        {
+            var scheme = Request.Scheme;
+            var domain = Request.Host.ToString();
+            var path = Url.Action("PostTargetResult", "TargetResult");
+            return $"{scheme}://{domain}{path}";
         }
     }
 }

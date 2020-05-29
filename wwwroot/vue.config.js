@@ -10,12 +10,12 @@ module.exports = {
     ],
 
     configureWebpack: {
-        optimization: {
-            splitChunks: {
-                minSize: 10000,
-                maxSize: 250000
-            }
-        },
+        // optimization: {
+        //     splitChunks: {
+        //         minSize: 10000,
+        //         maxSize: 250000
+        //     }
+        // },
         plugins: [
             // CKEditor needs its own plugin to be built using webpack.
             new CKEditorWebpackPlugin({

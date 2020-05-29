@@ -25,9 +25,18 @@
             <v-list-item v-for="target of stageTargets(stage)"
                          :key="target.id"
             >
-                <v-list-item-avatar>
-                    <v-icon dense class="grey lighten-1 white--text" v-text="'fa-scroll'"></v-icon>
-                </v-list-item-avatar>
+                <v-list-item-icon>
+                    <v-img v-if="isScriptTarget(target)"
+                           src="@/assets/icons/scriptTarget.svg"
+                           max-width="30"
+                           max-height="30"
+                    />
+                    <v-img v-else
+                           src="@/assets/icons/tutorialTarget.svg"
+                           max-width="30"
+                           max-height="30"
+                    />
+                </v-list-item-icon>
                 <v-list-item-content>
                     <v-list-item-title>{{target.title}}</v-list-item-title>
                     <v-list-item-subtitle>{{target.description}}</v-list-item-subtitle>
@@ -36,7 +45,7 @@
                     <v-btn icon
                            @click="() => removeStageTarget(target.id)"
                     >
-                        <v-icon small>fa-trash-alt</v-icon>
+                        <v-icon small color="primary">fa-trash-alt</v-icon>
                     </v-btn>
                 </v-list-item-action>
             </v-list-item>
@@ -74,13 +83,16 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
     import Vue from 'vue';
     import Component from 'vue-class-component';
     import {Prop} from "vue-property-decorator";
-    import AddTargetDialog from "@/components/AddTargetDialog";
     import {mapGetters} from "vuex";
     import {StageTarget} from "@/models/stageTarget";
+    import {Target} from "@/models/target";
+    import {Stage} from "@/models/stage";
+    import AddTargetDialog from "@/components/AddTargetDialog.vue";
+    import {Id} from "@/models/idType";
 
     @Component({
             components: {AddTargetDialog},
@@ -88,25 +100,25 @@
                 ...mapGetters('stage', {
                     stageTargets: 'stageTargets'
                 }),
-                stageTitle: {
-                    get() {
-                        return this.stage.title;
-                    },
-                    set(title) {
-                        this.$store.dispatch('stage/update', {id: this.stage.id, title});
-                    },
-                }
             }
         }
     )
     export default class StageEditor extends Vue {
-        @Prop() stage;
+        @Prop() stage!: Stage;
+
+        get stageTitle() {
+            return this.stage.title;
+        }
+
+        set stageTitle(title) {
+            this.$store.dispatch('stage/update', {id: this.stage.id, title});
+        }
 
         titleFieldHasFocus = true;
 
         rules = {
-            required: value => !!value || 'Feld darf nicht leer sein',
-            length: value => value.length <= 100 || 'Maximal 100 Zeichen erlaubt'
+            required: (value: string) => !!value || 'Feld darf nicht leer sein',
+            length: (value: string) => value.length <= 100 || 'Maximal 100 Zeichen erlaubt'
         };
 
         onBlur() {
@@ -117,9 +129,13 @@
             this.$store.dispatch('stage/remoteUpdate', this.stage.id);
         }
 
-        removeStageTarget(targetId) {
+        removeStageTarget(targetId: Id) {
             const stageTarget = new StageTarget({stageId: this.stage.id, targetId});
             this.$store.dispatch('stage/removeTarget', stageTarget);
+        }
+
+        isScriptTarget(target: Target) {
+            return Object.prototype.hasOwnProperty.call(target, 'script');
         }
     }
 </script>

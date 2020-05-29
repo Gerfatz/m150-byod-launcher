@@ -1,6 +1,7 @@
 import {GetterTree, MutationTree, ActionTree} from "vuex";
 import {Director} from "@/models/director";
 import {directorApi} from "@/api/directorApi";
+import {Id} from "@/models/idType";
 
 export interface DirectorState {
     activeDirector: Director;
@@ -37,6 +38,13 @@ const actions = {
                     commit('setActiveDirector', director);
                 });
         }
+    },
+
+    loadDirector({commit}, directorId: Id) {
+        directorApi.getDirector(directorId)
+            .then(director => {
+                commit('setActiveDirector', director);
+            });
     }
 
 } as ActionTree<DirectorState, any>;

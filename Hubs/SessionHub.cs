@@ -1,4 +1,5 @@
 using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using ByodLauncher.Models;
 using Microsoft.AspNetCore.SignalR;
@@ -76,7 +77,7 @@ namespace ByodLauncher.Hubs
             }
         }
 
-        public async Task JoinSession(Guid sessionId, string displayName)
+        public async Task JoinSession(Guid sessionId, string displayName, string username, string password)
         {
             var participant = new Participant
             {
@@ -95,8 +96,6 @@ namespace ByodLauncher.Hubs
 
             await AddToGroup(sessionId.ToString());
             await Clients.Caller.JoinSession(sessionId, participant.Id, displayName);
-
-            //await SendCurrentStageNumber(session);
         }
 
         public async Task JoinSessionAsParticipant(Guid participantId)

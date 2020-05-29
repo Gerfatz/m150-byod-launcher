@@ -52,10 +52,10 @@ class SessionApi extends Api {
             });
     }
 
-    public getByEditCode(editCode: string): Promise<Session> {
+    public getByEditCode(editCode: string): Promise<Session[]> {
         return this.get<Session[]>(`session?editCode=${editCode}`)
             .then((response: AxiosResponse<Session[]>) => {
-                return response.data[0];
+                return response.data;
             })
             .catch((error: AxiosError) => {
                 throw error;

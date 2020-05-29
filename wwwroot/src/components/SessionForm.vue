@@ -1,6 +1,5 @@
 <template>
-    <v-form v-model="syncFormIsValid" ref="baseForm">
-
+    <v-form v-model="syncFormIsValid" ref="baseForm" @submit.prevent="noSubmit">
         <v-row>
             <v-col cols="12">
                 <v-text-field v-if="sessionTitleFieldHasFocus"
@@ -13,76 +12,78 @@
                               @blur="onBlur('sessionTitle')"
                               @change="updateSessionTitle"
                 />
-                <h1 v-else
-                    class="headline editable-content"
-                    @click="sessionTitleFieldHasFocus = !sessionTitleFieldHasFocus"
-                >
-                    {{sessionTitle}}
-                    <v-icon>fa-pencil-alt</v-icon>
-                </h1>
+                <div v-else>
+                    <p class="overline">Titel der geführten Einrichtung</p>
+                    <h2 class="display-1 editable-content"
+                        @click="sessionTitleFieldHasFocus = !sessionTitleFieldHasFocus"
+                    >
+                        {{sessionTitle}}
+                        <v-icon>fa-pencil-alt</v-icon>
+                    </h2>
+                </div>
             </v-col>
         </v-row>
 
         <v-row justify="center">
-            <v-col cols="5">
+            <v-col cols="6">
                 <v-text-field v-if="directorNameFieldHasFocus"
                               ref="directorName"
                               v-model="directorName"
                               label="Name des Tour-Guides"
                               counter="100"
                               :rules="[validationRules.required, validationRules.length]"
+                              outlined
                               prepend-inner-icon="fa-user"
                               @blur="onBlur('directorName')"
                               @change="onDirectorChange"
                 />
-                <p v-else
-                   class="subtitle-1 editable-content"
-                   @click="focusField('directorName')"
-                >
-                    <v-icon left>fa-user</v-icon>
-                    {{directorName}}
-                    <v-icon small>fa-pencil-alt</v-icon>
-                </p>
+                <div v-else>
+                    <p class="overline">Ihr Name</p>
+                    <p class="title editable-content"
+                       @click="focusField('directorName')"
+                    >
+                        {{directorName}}
+                        <v-icon small>fa-pencil-alt</v-icon>
+                    </p>
+                </div>
             </v-col>
-            <v-col cols="5">
+            <v-col cols="6">
                 <v-text-field v-if="directorEmailFieldHasFocus"
                               ref="directorEmail"
                               v-model="directorEmail"
                               label="E-Mail Adresse des Tour-Guides"
                               :rules="[validationRules.required]"
+                              outlined
                               prepend-inner-icon="fa-envelope"
+                              suffix="@gibz.ch"
                               @blur="onBlur('directorEmail')"
                               @change="onDirectorChange"
                 />
-                <p v-else
-                   class="subtitle-1 editable-content"
-                   @click="focusField('directorEmail')"
-                >
-                    <v-icon left>fa-envelope</v-icon>
-                    {{directorEmail}}
-                    <v-icon small>fa-pencil-alt</v-icon>
+                <div v-else>
+                    <p class="overline">Ihre E-Mail Adresse</p>
+                    <p class="title editable-content"
+                       @click="focusField('directorEmail')"
+                    >
+                        {{directorEmail}}
+                        <v-icon small>fa-pencil-alt</v-icon>
+                    </p>
+                </div>
+            </v-col>
+            <v-col cols="6"
+                   v-if="currentAccessCode"
+            >
+                <p class="overline">Code für Teilnehmende</p>
+                <p class="title">
+                    {{getCodeString(currentAccessCode)}}
                 </p>
             </v-col>
-            <v-col cols="5">
-
-                <v-text-field v-if="currentAccessCode"
-                              label="Code für Teilnehmende"
-                              :value="currentAccessCode"
-                              v-mask="'###-###'"
-                              prepend-inner-icon="fa-door-open"
-                              readonly
-                              outlined
-                />
-            </v-col>
-            <v-col cols="5">
-                <v-text-field v-if="currentEditCode"
-                              label="Code für die Bearbeitung"
-                              :value="currentEditCode"
-                              v-mask="'###-###'"
-                              prepend-inner-icon="fa-lock"
-                              readonly
-                              outlined
-                />
+            <v-col cols="6"
+                   v-if="currentEditCode"
+            >
+                <p class="overline">Code für Administration</p>
+                <p class="title">
+                    {{getCodeString(currentEditCode)}}
+                </p>
             </v-col>
         </v-row>
     </v-form>
@@ -93,6 +94,8 @@
     import {Vue, Component, PropSync} from "vue-property-decorator";
     import {mapGetters} from "vuex";
     import {mask} from "vue-the-mask";
+    import {sessionIdentifiers} from "@/store/newModules/session";
+    import {directorIdentifiers} from "@/store/newModules/director";
 
     type focusFieldType = 'sessionTitleFieldHasFocus' | 'directorNameFieldHasFocus' | 'directorEmailFieldHasFocus';
 
@@ -103,16 +106,12 @@
                 currentAccessCode: 'currentAccessCode',
                 currentEditCode: 'currentEditCode',
             }),
-            // ...mapGetters('director', {
-            //     displayName: 'displayName',
-            //     email: 'email'
-            // }),
-
         }
     })
     export default class SessionForm extends Vue {
         @PropSync('formIsValid', {type: Boolean}) syncFormIsValid!: boolean;
 
+        directorEmailSuffix = '@gibz.ch';
         formIsValid = false;
 
         sessionTitleFieldHasFocus = true;
@@ -120,27 +119,27 @@
         directorEmailFieldHasFocus = true;
 
         get sessionTitle() {
-            return this.$store.state.session.activeSession.title ?? '';
+            return this.$store.state.session.session.title ?? '';
         }
 
         set sessionTitle(title) {
-            this.$store.dispatch('session/update', {title});
+            this.$store.dispatch(sessionIdentifiers.actions.update, {title});
         }
 
         get directorName() {
-            return this.$store.state.director.activeDirector.displayName ?? '';
+            return this.$store.state.director.director.displayName ?? '';
         }
 
         set directorName(displayName) {
-            this.$store.dispatch('director/update', {displayName});
+            this.$store.dispatch(directorIdentifiers.actions.update, {displayName});
         }
 
         get directorEmail() {
-            return this.$store.state.director.activeDirector.email ?? '';
+            return this.$store.state.director.director.email ?? '';
         }
 
         set directorEmail(email) {
-            this.$store.dispatch('director/update', {email});
+            this.$store.dispatch(directorIdentifiers.actions.update, {email});
         }
 
         validationRules = {
@@ -148,18 +147,28 @@
             length: (value: string) => value.length <= 100 || "Maximal 100 Zeichen erlaubt",
         };
 
-        onBlur(fieldName: 'sessionTitle' | 'directorName' | 'directorEmail') {
+        async onBlur(fieldName: 'sessionTitle' | 'directorName' | 'directorEmail') {
             let hasFocus = this[fieldName].length === 0;
 
             if (fieldName === 'sessionTitle' || fieldName === 'directorName') {
                 hasFocus = hasFocus || this[fieldName].length > 100;
+            } else if (fieldName === 'directorEmail' && this[fieldName] && !this[fieldName].endsWith(this.directorEmailSuffix)) {
+                await this.$store.dispatch(directorIdentifiers.actions.update, {email: this.directorEmail + this.directorEmailSuffix})
             }
 
             const focusFieldName = (fieldName + "FieldHasFocus") as focusFieldType;
             this[focusFieldName] = hasFocus;
         }
 
-        focusField(fieldName: string) {
+        async focusField(fieldName: string) {
+            if (fieldName === 'directorEmail') {
+                let email = this.$store.state.director.director.email;
+                if (email.endsWith(this.directorEmailSuffix)) {
+                    email = email.replace(this.directorEmailSuffix, '');
+                    await this.$store.dispatch(directorIdentifiers.actions.update, {email});
+                }
+            }
+
             const focusFieldName = (fieldName + "FieldHasFocus") as focusFieldType;
 
             this[focusFieldName] = !this[focusFieldName];
@@ -167,11 +176,19 @@
         }
 
         updateSessionTitle() {
-            this.$store.dispatch('session/remoteUpdate');
+            this.$store.dispatch(sessionIdentifiers.actions.remoteUpdate);
         }
 
         onDirectorChange() {
-            this.$store.dispatch('director/remoteUpdate');
+            this.$store.dispatch(directorIdentifiers.actions.remoteUpdate);
+        }
+
+        getCodeString(code: number) {
+            return code.toString().substr(0, 3) + '-' + code.toString().substr(3, 3)
+        }
+
+        noSubmit() {
+            // prevent form submission
         }
 
     }

@@ -24,7 +24,6 @@ namespace ByodLauncher.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/Stage
         [HttpGet]
         public async Task<ActionResult<IEnumerable<StageDto>>> GetStages(Guid sessionId)
         {
@@ -41,7 +40,6 @@ namespace ByodLauncher.Controllers
             return _mapper.Map<List<Stage>, List<StageDto>>(stages);
         }
 
-        // GET: api/Stage/5
         [HttpGet("{id}")]
         public async Task<ActionResult<StageDto>> GetStage(Guid id)
         {
@@ -55,9 +53,6 @@ namespace ByodLauncher.Controllers
             return _mapper.Map<StageDto>(stage);
         }
 
-        // PUT: api/Stage/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
-        // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPut("{id}")]
         public async Task<IActionResult> PutStage(Guid id, StageDto stageDto)
         {
@@ -86,9 +81,6 @@ namespace ByodLauncher.Controllers
             return NoContent();
         }
 
-        // POST: api/Stage
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
-        // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPost]
         public async Task<ActionResult<StageDto>> PostStage(Guid sessionId, StageDto stageDto)
         {
@@ -101,7 +93,6 @@ namespace ByodLauncher.Controllers
                 _mapper.Map<StageDto>(stage));
         }
 
-        // DELETE: api/Stage/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<StageDto>> DeleteStage(Guid id)
         {

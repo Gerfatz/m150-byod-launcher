@@ -59,11 +59,22 @@ const actions = {
                 });
         }
     },
-    
-    loadByAccessCode(_, accessCode: string){
+
+    loadByAccessCode(_, accessCode: string) {
         return sessionApi.getByAccessCode(accessCode);
     },
-    
+
+    loadByEditCode({commit}, editCode: string) {
+        return sessionApi.getByEditCode((editCode))
+            .then(sessions => {
+                if (sessions.length === 1) {
+                    commit('setActiveSession', sessions[0]);
+                    return sessions[0];
+                }
+                return null;
+            })
+    }
+
 } as ActionTree<SessionState, any>;
 
 const mutations = {

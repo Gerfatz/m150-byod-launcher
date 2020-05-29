@@ -11,6 +11,7 @@ using ByodLauncher.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -46,6 +47,16 @@ namespace ByodLauncher
                 options.Cookie.Name = "BYOD Laucher";
                 options.Cookie.SameSite = SameSiteMode.Strict;
             });
+
+            services.AddAuthentication("SimulatedAuthentication")
+                .AddCookie("SimulatedAuthentication", options =>
+                {
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.IsEssential = true;
+                    options.Cookie.Name = "ByodLauncherAuth";
+                    options.Cookie.SameSite = SameSiteMode.Strict;
+                    options.LoginPath = "/Login";
+                });
 
             var connectionString = Configuration.GetConnectionString("MariaDb");
             services.AddDbContext<ByodLauncherContext>(options => options
@@ -84,6 +95,11 @@ namespace ByodLauncher
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
+
             app.UseCors(LocalhostCorsPolicy);
 
             // app.UseHttpsRedirection();
@@ -94,18 +110,29 @@ namespace ByodLauncher
 
                 Dictionary<string, List<string>> sources = new Dictionary<string, List<string>>
                 {
-                    ["script-src"] = new List<string>{"'self'"},
-                    ["style-src"] = new List<string>{"'self'", "https://fonts.googleapis.com/ https://use.fontawesome.com/"},
-                    ["font-src"] = new List<string>{"'self'", "https://fonts.gstatic.com/ https://use.fontawesome.com/"},
-                    ["img-src"] = new List<string>{"'self'"},
+                    ["script-src"] = new List<string> {"'self'", "'nonce-QllPRCBMYXVuY2hlciB2b24gUGV0ZXIgR2lzbGVy'"},
+                    ["style-src"] = new List<string>
+                    {
+                        "'self'", "https://fonts.googleapis.com/", "https://use.fontawesome.com/",
+                        "'nonce-QllPRCBMYXVuY2hlciB2b24gUGV0ZXIgR2lzbGVy'"
+                    },
+                    ["font-src"] = new List<string>
+                        {"'self'", "https://fonts.gstatic.com/ https://use.fontawesome.com/"},
+                    ["img-src"] = new List<string> {"'self'"},
                     ["frame-ancestors"] = new List<string> {"'none'"},
-                    ["default-src"] = new List<string>{"'self'"},
+                    ["connect-src"] = new List<string> {"'self'"},
+                    ["default-src"] = new List<string> {"'self'"},
                 };
 
                 if (env.IsDevelopment())
                 {
                     sources["script-src"].Add("'unsafe-eval'");
                     sources["style-src"].Add("'unsafe-inline'");
+
+                    foreach (var keyValuePair in sources)
+                    {
+                        keyValuePair.Value.RemoveAll(source => source.StartsWith("'nonce-"));
+                    }
                 }
 
                 StringBuilder sb = new StringBuilder();
@@ -115,11 +142,13 @@ namespace ByodLauncher
                     sb.Append(entry.Key + " " + string.Join(' ', entry.Value) + "; ");
                 }
 
-                context.Response.Headers.Add("Content-Security-Policy", sb.ToString());
+                // TODO: REMOVE!!!
+                // context.Response.Headers.Add("Content-Security-Policy", sb.ToString());
                 await next();
             });
 
             app.UseRouting();
+            app.UseAuthentication();
             app.UseAuthorization();
             app.UseSession();
 

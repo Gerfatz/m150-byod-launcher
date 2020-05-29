@@ -14,6 +14,7 @@ import {tutorialStepApi} from "@/api/tutorialStepApi";
 
 export interface AttendSessionState {
     participantId: Id;
+    displayName: string;
     session: Session | null;
     stages: Stage[];
     targets: { [key: string]: Target[] };
@@ -24,6 +25,7 @@ export interface AttendSessionState {
 
 const state = {
     participantId: null,
+    displayName: '',
     session: null,
     stages: [],
     targets: {},
@@ -56,6 +58,10 @@ const getters = {
 const actions = {
     setParticipantId({commit}, participantId: Id) {
         commit('SET_PARTICIPANT_ID', participantId);
+    },
+    
+    setDisplayName({commit}, displayName: string){
+        commit('SET_DISPLAY_NAME', displayName);
     },
 
     downloadSessionData({commit, state, dispatch}, sessionId: Id) {
@@ -155,6 +161,10 @@ const actions = {
 const mutations = {
     SET_PARTICIPANT_ID(state, participantId: Id) {
         state.participantId = participantId;
+    },
+
+    SET_DISPLAY_NAME(state, displayName: string){
+        state.displayName = displayName;
     },
 
     SET_SESSION(state, session: Session) {

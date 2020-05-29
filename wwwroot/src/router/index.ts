@@ -22,11 +22,17 @@ const routes = [
         component: NewSession
     },
     {
-        path: '/edit-session/:editCode',
+        path: '/edit-session',
         name: 'edit session',
         component: EditSession,
         props: true
     },
+    // {
+    //     path: '/edit-session/:editCode',
+    //     name: 'edit session',
+    //     component: EditSession,
+    //     props: true
+    // },
     {
         path: '/new-tutorial-target',
         name: 'new tutorial target',

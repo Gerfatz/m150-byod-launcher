@@ -1,12 +1,12 @@
 <template>
     <v-app>
-        <v-app-bar app
-                   color="primary"
-                   dark
-        >
-            <v-toolbar-title>BYOD Launcher</v-toolbar-title>
+<!--        <v-app-bar app-->
+<!--                   color="primary"-->
+<!--                   dark-->
+<!--        >-->
+<!--            <v-toolbar-title>BYOD Launcher</v-toolbar-title>-->
 
-        </v-app-bar>
+<!--        </v-app-bar>-->
 
         <v-content>
             <v-container>
@@ -29,11 +29,15 @@
 
 <style lang="scss">
 
+    .v-application p.overline {
+        margin-bottom: 0;
+    }
+    
     .editable-content {
         cursor: pointer;
         
         .v-icon.v-icon {
-            vertical-align: text-top;
+            vertical-align: middle;
         }
     }
 </style>

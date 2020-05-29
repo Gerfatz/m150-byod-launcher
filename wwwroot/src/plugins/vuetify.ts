@@ -6,10 +6,20 @@ Vue.use(Vuetify);
 
 export default new Vuetify({
     lang: {
-      locales: { de },
-      current: 'de',
+        locales: {de},
+        current: 'de',
     },
-  icons: {
-    iconfont: 'fa',
-  },
+    icons: {
+        iconfont: 'fa',
+    },
+    theme: {
+        options: {
+            cspNonce: 'QllPRCBMYXVuY2hlciB2b24gUGV0ZXIgR2lzbGVy',
+        },
+        themes: {
+            light: {
+                primary: '#9e303c'
+            }
+        }
+    }
 });

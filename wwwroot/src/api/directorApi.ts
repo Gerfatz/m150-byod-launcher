@@ -1,6 +1,7 @@
 import {AxiosError, AxiosRequestConfig, AxiosResponse} from "axios";
 import Api from "@/api/api";
 import {Director} from "@/models/director";
+import {Id} from "@/models/idType";
 
 class DirectorApi extends Api {
 
@@ -9,6 +10,16 @@ class DirectorApi extends Api {
 
         this.createDirector = this.createDirector.bind(this);
         this.updateDirector = this.updateDirector.bind(this);
+    }
+
+    public getDirector(directorId: Id): Promise<Director> {
+        return this.get<Director>(`director/${directorId}`)
+            .then((response: AxiosResponse) => {
+                return response.data;
+            })
+            .catch((error: AxiosError) => {
+                throw error;
+            })
     }
 
     public createDirector(director: Director): Promise<Director> {

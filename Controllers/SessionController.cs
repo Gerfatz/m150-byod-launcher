@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using ByodLauncher.Models;
 using ByodLauncher.Models.Dto;
 using ByodLauncher.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ByodLauncher.Controllers
 {
@@ -27,7 +28,6 @@ namespace ByodLauncher.Controllers
             _sessionCodeService = sessionCodeService;
         }
 
-        // GET: api/Session
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SessionDto>>> GetSession(
             [FromQuery(Name = "accessCode")] string accessCode,
@@ -36,23 +36,27 @@ namespace ByodLauncher.Controllers
         {
             List<Session> sessions;
 
+            var query = _context.Sessions
+                .Include(s => s.Stages)
+                .ThenInclude(stage => stage.StageTargets)
+                .ThenInclude(stageTarget => stageTarget.Target);
+
             if (string.IsNullOrEmpty(accessCode) && string.IsNullOrEmpty(editCode))
             {
-                sessions = await _context.Sessions.ToListAsync();
+                sessions = await query.ToListAsync();
             }
             else if (!string.IsNullOrEmpty(accessCode))
             {
-                sessions = await _context.Sessions.Where(session => session.AccessCode == accessCode).ToListAsync();
+                sessions = await query.Where(session => session.AccessCode == accessCode).ToListAsync();
             }
             else
             {
-                sessions = await _context.Sessions.Where(session => session.EditCode == editCode).ToListAsync();
+                sessions = await query.Where(session => session.EditCode == editCode).ToListAsync();
             }
 
-            return _mapper.Map<List<Session>, List<SessionDto>>(sessions);
+            return _mapper.Map<List<Session>, List<SessionJoinRequestDto>>(sessions);
         }
 
-        // GET: api/Session/5
         [HttpGet("{id}")]
         public async Task<ActionResult<SessionDto>> GetSession(Guid id)
         {
@@ -65,9 +69,6 @@ namespace ByodLauncher.Controllers
             return _mapper.Map<SessionDto>(session);
         }
 
-        // PUT: api/Session/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
-        // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPut("{id}")]
         public async Task<IActionResult> PutSession(Guid id, SessionDto sessionDto)
         {
@@ -98,9 +99,6 @@ namespace ByodLauncher.Controllers
             return NoContent();
         }
 
-        // POST: api/Session
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
-        // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPost]
         public async Task<ActionResult<SessionDto>> PostSession(SessionDto sessionDto)
         {
@@ -113,7 +111,7 @@ namespace ByodLauncher.Controllers
             return CreatedAtAction("GetSession", new {id = sessionDto.Id}, _mapper.Map<SessionDto>(session));
         }
 
-        // DELETE: api/Session/5
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<ActionResult<SessionDto>> DeleteSession(Guid id)
         {

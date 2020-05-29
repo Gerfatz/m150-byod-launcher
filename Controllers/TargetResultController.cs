@@ -33,14 +33,12 @@ namespace ByodLauncher.Controllers
         [HttpPost]
         public async Task<ActionResult<TargetResultDto>> PostTargetResult(TargetResultDto targetResultDto)
         {
-            // Verify participantId
             var participant = await _context.Participants.FindAsync(targetResultDto.ParticipantId);
             if (participant == null)
             {
                 return BadRequest();
             }
 
-            // Verify targetId
             var target = await _context.Targets.FindAsync(targetResultDto.TargetId);
             if (target == null)
             {
@@ -58,6 +56,7 @@ namespace ByodLauncher.Controllers
             return targetResultDto;
         }
 
+        [HttpDelete]
         public async Task<ActionResult<TargetResultDto>> DeleteActionResult(
             [FromQuery] Guid targetId,
             [FromQuery] Guid participantId

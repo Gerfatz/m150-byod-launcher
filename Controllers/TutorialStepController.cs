@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using ByodLauncher.Models;
 using ByodLauncher.Models.Dto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -44,6 +45,7 @@ namespace ByodLauncher.Controllers
             return _mapper.Map<TutorialStepDto>(tutorialStep);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult<TutorialStepDto>> PostTutorialStep(Guid tutorialTargetId,
             TutorialStepDto tutorialStepDto)
@@ -60,6 +62,7 @@ namespace ByodLauncher.Controllers
             return _mapper.Map<TutorialStepDto>(tutorialStep);
         }
 
+        [Authorize]
         [HttpPut("{tutorialStepId}")]
         public async Task<IActionResult> PutTutorialStep(Guid tutorialTargetId, Guid tutorialStepId,
             TutorialStepDto tutorialStepDto)
@@ -94,6 +97,7 @@ namespace ByodLauncher.Controllers
             return NoContent();
         }
 
+        [Authorize]
         [HttpDelete("{tutorialStepId}")]
         public async Task<ActionResult<TutorialStepDto>> DeleteTutorialStep(Guid tutorialTargetId, Guid tutorialStepId)
         {

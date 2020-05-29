@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ByodLauncher.Models;
 using ByodLauncher.Models.Dto;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ByodLauncher.Controllers
 {
@@ -24,14 +24,13 @@ namespace ByodLauncher.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/Director
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DirectorDto>>> GetDirectorDto()
         {
             return _mapper.Map<List<Director>, List<DirectorDto>>(await _context.Directors.ToListAsync());
         }
 
-        // GET: api/Director/5
         [HttpGet("{id}")]
         public async Task<ActionResult<DirectorDto>> GetDirectorDto(Guid id)
         {
@@ -45,9 +44,6 @@ namespace ByodLauncher.Controllers
             return _mapper.Map<DirectorDto>(director);
         }
 
-        // PUT: api/Director/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
-        // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDirectorDto(Guid id, DirectorDto directorDto)
         {
@@ -77,9 +73,6 @@ namespace ByodLauncher.Controllers
             return NoContent();
         }
 
-        // POST: api/Director
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
-        // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPost]
         public async Task<ActionResult<DirectorDto>> PostDirectorDto(DirectorDto directorDto)
         {
@@ -90,7 +83,7 @@ namespace ByodLauncher.Controllers
             return CreatedAtAction("GetDirectorDto", new {id = directorDto.Id}, _mapper.Map<DirectorDto>(director));
         }
 
-        // DELETE: api/Director/5
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<ActionResult<DirectorDto>> DeleteDirectorDto(Guid id)
         {

@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import {GetterTree, MutationTree, ActionTree} from "vuex";
 import {Stage} from "@/models/stage";
 import {stageApi} from "@/api/stageApi";
@@ -8,10 +9,12 @@ import {Id} from "@/models/idType";
 
 export interface StageState {
     stages: Stage[];
+    targets: { [key: string]: Target[] };
 }
 
 const state = {
     stages: [],
+    targets: {},
 } as StageState;
 
 const getters = {
@@ -21,6 +24,9 @@ const getters = {
 
     stageTargets: (state, getters, rootState) => (stage: Stage) => {
         const targetIds = stage.targetIds;
+        if (!targetIds) {
+            return state.targets[stage.id as string];
+        }
         const targets = rootState.target.availableTargets;
         return targetIds
             .map(id => targets.find((target: Target) => target.id === id))
@@ -28,7 +34,10 @@ const getters = {
     },
 
     availableTargets: (state, getters, rootState) => (stage: Stage) => {
-        const stageTargetIds = stage.targetIds;
+        let stageTargetIds = stage.targetIds;
+        if (!stageTargetIds) {
+            stageTargetIds = state.targets[stage.id as string]?.map(target => target.id) ?? [];
+        }
         const targets = rootState.target.availableTargets;
         return targets.filter((target: Target) => !stageTargetIds.includes(target.id));
     }
@@ -131,6 +140,31 @@ const actions = {
             });
         }
     },
+
+    loadStages({commit}, sessionId: Id) {
+        stageApi.getStages(sessionId).then(stages => {
+            commit('SET_STAGES', stages);
+            return stages;
+        })
+            .then(stages => {
+                const requests = [];
+                for (const stage of stages) {
+                    requests.push(stageTargetApi.getStageTargets(stage.id));
+                }
+                Promise.all(requests).then(stageTargets => {
+                    const targets: { [key: string]: Target[] } = {};
+                    stageTargets.forEach((values, index) => {
+                        const stageId = state.stages[index].id;
+                        if (stageId != null) {
+                            values = values.map(target => new Target(target));
+                            targets[stageId] = values;
+                        }
+                    });
+                    commit('SET_TARGETS', targets);
+                });
+            });
+    },
+
 } as ActionTree<StageState, any>;
 
 const mutations = {
@@ -146,9 +180,14 @@ const mutations = {
         state.stages.splice(index, 1, new Stage(existingStage));
     },
 
-    addTarget(state, stageTarget: StageTarget) {
-        state.stages.find((stage: Stage) => stage.id === stageTarget.stageId)?.targetIds.push(stageTarget.targetId);
-    },
+    // addTarget(state, stageTarget: StageTarget) {
+    //     // TODO...
+    //     // const target = null;
+    //     // state.targets[stageTarget.stageId as string].push(target);
+    //    
+    //     // TODO: verify...
+    //     // state.stages.find((stage: Stage) => stage.id === stageTarget.stageId)?.targetIds.push(stageTarget.targetId);
+    // },
 
     removeTarget(state, stageTarget: StageTarget) {
         const stage = state.stages.find((stage: Stage) => stage.id === stageTarget.stageId);
@@ -165,6 +204,14 @@ const mutations = {
         if (index !== -1) {
             state.stages.splice(index, 1);
         }
+    },
+
+    SET_STAGES(state, stages: Stage[]) {
+        state.stages.splice(0, state.stages.length - 1, ...stages);
+    },
+
+    SET_TARGETS(state, targets: { [key: string]: Target[] }) {
+        Vue.set(state, 'targets', targets);
     }
 
 } as MutationTree<StageState>;
