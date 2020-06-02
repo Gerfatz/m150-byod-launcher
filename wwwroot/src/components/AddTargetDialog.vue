@@ -25,7 +25,7 @@
             <v-card-text>
                 <v-list two-line flat>
                     <v-list-item-group v-model="selectedTargets" multiple>
-                        <v-list-item v-for="target in availableTargets(stage)"
+                        <v-list-item v-for="target in availableStageTargetsForStage(stage.id)"
                                      :key="target.id"
                                      :value="target.id">
                             <template v-slot:default="{active, toggle}">
@@ -91,11 +91,12 @@
     import {StageTarget} from "@/models/stageTarget";
     import {Target} from "@/models/target";
     import {Stage} from "@/models/stage";
+    import {stageTargetIdentifiers} from "@/store/newModules/stageTarget";
 
     @Component({
         computed: {
-            ...mapGetters('stage', {
-                availableTargets: 'availableTargets',
+            ...mapGetters('stageTarget', {
+                availableStageTargetsForStage: 'availableStageTargetsForStage',
             })
         }
     })
@@ -110,7 +111,7 @@
             const promises: Promise<any>[] = [];
             this.selectedTargets.forEach(targetId => {
                 const stageTarget = new StageTarget({stageId: stage.id, targetId});
-                promises.push(this.$store.dispatch('stage/addTarget', stageTarget));
+                promises.push(this.$store.dispatch(stageTargetIdentifiers.actions.add, stageTarget));
             });
 
             Promise.all(promises).then(() => {

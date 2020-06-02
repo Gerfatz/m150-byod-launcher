@@ -1,14 +1,15 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import director from './newModules/director'
-import session from './newModules/session'
-import stage from "@/store/modules/stage";
-import target from "@/store/modules/target";
-import tutorialTarget from "@/store/modules/tutorialTarget";
-import tutorialStep from "@/store/modules/tutorialStep";
-import signalR from "@/store/modules/signalR";
-import attendSession from "@/store/modules/attendSession";
-import orchestrateSession from "@/store/modules/orchestrateSession";
+import director from '@/store/newModules/director'
+import session from '@/store/newModules/session'
+import stage from "@/store/newModules/stage";
+import stageTarget from "@/store/newModules/stageTarget";
+import target from "@/store/newModules/target";
+import tutorialTarget from "@/store/newModules/tutorialTarget";
+import tutorialStep from "@/store/newModules/tutorialStep";
+import attendSession from "@/store/newModules/attendSession";
+import orchestrateSession from "@/store/newModules/orchestrateSession";
+import signalR from "@/store/newModules/signalR";
 import createSignalRPlugin from "@/store/plugin/signalR";
 
 Vue.use(Vuex);
@@ -18,6 +19,7 @@ export default new Vuex.Store({
         director,
         session,
         stage,
+        stageTarget,
         target,
         tutorialTarget,
         tutorialStep,

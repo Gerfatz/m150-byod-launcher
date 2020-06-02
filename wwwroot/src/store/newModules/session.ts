@@ -1,6 +1,12 @@
 import {GetterTree, MutationTree, ActionTree} from "vuex";
 import {Session} from "@/models/session";
 import {sessionApi} from "@/api/sessionApi";
+import {Id} from "@/models/idType";
+import {stageIdentifiers} from "@/store/newModules/stage";
+import {stageTargetIdentifiers} from "@/store/newModules/stageTarget";
+import {Target} from "@/models/target";
+import {tutorialStepIdentifiers} from "@/store/newModules/tutorialStep";
+import {directorIdentifiers} from "@/store/newModules/director";
 
 const modulePrefix = 'session/'
 
@@ -15,6 +21,7 @@ export const sessionIdentifiers = {
         remoteUpdate: modulePrefix + 'REMOTE_UPDATE',
         loadByAccessCode: modulePrefix + 'LOAD_BY_ACCESS_CODE',
         loadByEditCode: modulePrefix + 'LOAD_BY_EDIT_CODE',
+        downloadAllData: modulePrefix + 'DOWNLOAD_ALL_DATA',
     },
     mutations: {
         setSession: modulePrefix + 'SET_SESSION'
@@ -81,6 +88,41 @@ const actions = {
                     return sessions[0];
                 }
                 return null;
+            })
+    },
+
+    DOWNLOAD_ALL_DATA({state, rootState, commit, dispatch}, sessionId: Id) {
+        return sessionApi.getSession(sessionId)
+            .then(session => {
+                commit(localIdentifier(sessionIdentifiers.mutations.setSession), session);
+                return session;
+            })
+            .then((session: Session) => {
+                dispatch(directorIdentifiers.actions.load, session.directorId, {root: true});
+            })
+            .then(() => {
+                return dispatch(stageIdentifiers.actions.load, state.session.id, {root: true});
+            })
+            .then(() => {
+                const requests = [];
+                for (const stage of rootState.stage.stages) {
+                    requests.push(dispatch(stageTargetIdentifiers.actions.load, stage.id, {root: true}));
+                }
+                return Promise.all(requests);
+            })
+            .then(() => {
+                const tutorialStepPromises = [];
+                const targetsArray = Object.values(rootState.stageTarget.stageTargets as { [key: string]: Target[] });
+                for (const tutorialTargets of targetsArray) {
+                    for (const tutorialTarget of tutorialTargets) {
+                        if (!Object.prototype.hasOwnProperty.call(tutorialTarget, 'script')) {
+                            tutorialStepPromises.push(
+                                dispatch(tutorialStepIdentifiers.actions.load, tutorialTarget.id, {root: true}))
+                            ;
+                        }
+                    }
+                }
+                return Promise.all(tutorialStepPromises);
             })
     }
 

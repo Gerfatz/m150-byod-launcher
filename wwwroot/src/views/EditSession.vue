@@ -43,7 +43,9 @@
                         <h1 class="display-3 text-center">{{session.title}}</h1>
                     </v-col>
                     <v-col cols="12">
-                        <session-form/>
+                        <session-form :default-director-fields-focus="false"
+                                      @start-session="startSession"
+                        />
                     </v-col>
                 </v-row>
 
@@ -80,6 +82,10 @@
     import SessionForm from "@/components/SessionForm.vue";
     import StageEditor from "@/components/StageEditor.vue";
     import {mapGetters} from "vuex";
+    import {sessionIdentifiers} from "@/store/newModules/session";
+    import {targetIdentifiers} from "@/store/newModules/target";
+    import {signalRIdentifiers} from "@/store/newModules/signalR";
+    import {stageIdentifiers} from "@/store/newModules/stage";
 
     @Component({
         components: {SessionForm, StageEditor},
@@ -95,7 +101,7 @@
     export default class EditSession extends Vue {
 
         get session() {
-            return this.$store.state.session.activeSession;
+            return this.$store.state.session.session;
         }
 
         showEditForm = false;
@@ -131,15 +137,8 @@
         async onKeyUp() {
             const editCode = this.getRawValue(this.editCode);
             if (editCode.length === 6) {
-                await this.$store.dispatch('session/loadByEditCode', editCode)
-                    .then(this.thenHandler)
-                    .then(this.loadDirector)
-                    .then(() => {
-                        this.$store.dispatch('stage/loadStages', this.session.id);
-                    })
-                    .then(() => {
-                        this.$store.dispatch('target/loadAvailableTargets')
-                    });
+                await this.$store.dispatch(sessionIdentifiers.actions.loadByEditCode, editCode)
+                    .then(this.thenHandler);
             } else {
                 this.invalidEditCode = false;
             }
@@ -157,23 +156,19 @@
                 });
             } else {
                 this.showEditForm = true;
+                this.$store.dispatch(sessionIdentifiers.actions.downloadAllData, session.id)
+                    .then(() => {
+                        this.$store.dispatch(targetIdentifiers.actions.load);
+                    });
             }
         }
 
-        loadDirector() {
-            this.$store.dispatch('director/loadDirector', this.session.directorId);
-        }
-
         addStage() {
-            this.$store.dispatch('stage/addStage');
+            this.$store.dispatch(stageIdentifiers.actions.add);
         }
 
-        // startSession() {
-        //     sessionApi.getByEditCode(this.editCode)
-        //         .then(session => {
-        //             this.$store.dispatch('signalR/startSession', session.id);
-        //         });
-        //     // this.$router.push({name: 'orchestrate session'});
-        // }
+        startSession() {
+            this.$store.dispatch(signalRIdentifiers.actions.startSession, this.session.id);
+        }
     }
 </script>

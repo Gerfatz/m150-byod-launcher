@@ -8,8 +8,6 @@ export class Session {
     requiresCredentials = false;
     currentStage = 0;
     directorId: Id = null;
-    // stageIds: Id[] = [];
-    // participantIds: Id[] = [];
 
     public constructor(init?: Partial<Session>) {
         Object.assign(this, init);

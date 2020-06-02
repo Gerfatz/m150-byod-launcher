@@ -17,7 +17,7 @@
             </template>
 
             <template v-if="isTutorialTarget()">
-                <tutorial-target-view :target="target" :steps="tutorialSteps"/>
+                <tutorial-target-view :target="target" :steps="tutorialStepsForTarget(target.id)"/>
                 <slot name="participant-target-view" :target="target"></slot>
             </template>
 
@@ -31,15 +31,19 @@
     import {Target} from "@/models/target";
     import {Id} from "@/models/idType";
     import TutorialTargetView from "@/components/TutorialTargetView.vue";
-    import {TutorialStep} from "@/models/tutorialStep";
     import {targetApi} from "@/api/targetApi";
+    import {mapGetters} from "vuex";
 
     @Component({
-        components: {TutorialTargetView}
+        components: {TutorialTargetView},
+        computed: {
+            ...mapGetters('tutorialStep', {
+                tutorialStepsForTarget: 'tutorialStepsForTarget',
+            })
+        }
     })
     export default class TargetView extends Vue {
         @Prop({required: true}) readonly target!: Target;
-        @Prop({required: true}) readonly tutorialSteps!: TutorialStep[];
 
         public isSimpleScriptTarget() {
             return Object.prototype.hasOwnProperty.call(this.target, 'script');

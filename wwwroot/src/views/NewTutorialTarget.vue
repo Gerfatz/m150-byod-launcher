@@ -45,7 +45,7 @@
                 </v-col>
             </v-row>
 
-            <v-row v-if="activeTutorialTarget.id === null">
+            <v-row v-if="newTutorialTarget.id === null">
                 <v-col class="text-center">
                     <v-btn large
                            :disabled="!formIsValid"
@@ -59,7 +59,7 @@
         </v-form>
 
         <v-row>
-            <v-col v-if="activeTutorialTarget.stepIds.length > 0"
+            <v-col v-if="orderedTutorialSteps.length > 0"
                    cols="12"
             >
                 <tutorial-step-editor v-for="step of orderedTutorialSteps"
@@ -68,7 +68,7 @@
                 />
             </v-col>
 
-            <v-col v-if="activeTutorialTarget.id"
+            <v-col v-if="newTutorialTarget.id"
                    class="text-right"
             >
                 <v-btn text @click="addTutorialStep">
@@ -85,31 +85,33 @@
     import Component from "vue-class-component";
     import TutorialStepEditor from "@/components/TutorialStepEditor";
     import {mapGetters, mapState} from "vuex";
+    import {tutorialTargetIdentifiers} from "@/store/newModules/tutorialTarget";
+    import {tutorialStepIdentifiers} from "@/store/newModules/tutorialStep";
 
     @Component({
         components: {TutorialStepEditor},
         computed: {
             ...mapState('tutorialTarget', {
-                activeTutorialTarget: 'activeTutorialTarget'
+                newTutorialTarget: 'newTutorialTarget'
             }),
             ...mapGetters('tutorialStep', {
-                tutorialStep: 'tutorialStep',
+                // tutorialStep: 'tutorialStep',
                 orderedTutorialSteps: 'orderedTutorialSteps',
             }),
             title: {
                 get() {
-                    return this.$store.state.tutorialTarget.activeTutorialTarget.title ?? '';
+                    return this.$store.state.tutorialTarget.newTutorialTarget.title ?? '';
                 },
                 set(title) {
-                    this.$store.dispatch('tutorialTarget/update', {title})
+                    this.$store.dispatch(tutorialTargetIdentifiers.actions.update, {title})
                 },
             },
             description: {
                 get() {
-                    return this.$store.state.tutorialTarget.activeTutorialTarget.description ?? '';
+                    return this.$store.state.tutorialTarget.newTutorialTarget.description ?? '';
                 },
                 set(description) {
-                    this.$store.dispatch('tutorialTarget/update', {description})
+                    this.$store.dispatch(tutorialTargetIdentifiers.actions.update, {description})
                 },
             }
         }
@@ -141,15 +143,15 @@
         }
 
         createTutorialTarget() {
-            this.$store.dispatch('tutorialTarget/create');
+            this.$store.dispatch(tutorialTargetIdentifiers.actions.create);
         }
 
         onChange() {
-            this.$store.dispatch('tutorialTarget/remoteUpdate',);
+            this.$store.dispatch(tutorialTargetIdentifiers.actions.remoteUpdate);
         }
 
         addTutorialStep() {
-            this.$store.dispatch('tutorialStep/addTutorialStep');
+            this.$store.dispatch(tutorialStepIdentifiers.actions.add);
         }
 
     }

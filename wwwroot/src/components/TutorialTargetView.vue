@@ -61,7 +61,7 @@
     import {TutorialTarget} from "@/models/tutorialTarget";
     import {TutorialStep} from "@/models/tutorialStep";
 
-    @Component
+    @Component({})
     export default class TutorialTargetView extends Vue {
         @Prop({required: true}) target!: TutorialTarget;
         @Prop({required: true}) steps!: TutorialStep[];

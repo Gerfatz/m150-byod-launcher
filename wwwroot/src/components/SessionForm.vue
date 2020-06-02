@@ -85,14 +85,26 @@
                     {{getCodeString(currentEditCode)}}
                 </p>
             </v-col>
+            <v-col cols="12"
+                   class="text-center"
+                   v-show="stages.length >= 1"
+            >
+                <v-btn large
+                       color="primary"
+                       @click="$emit('start-session')"
+                >
+                    <v-icon left>fa-play</v-icon>
+                    Einrichtung starten
+                </v-btn>
+            </v-col>
         </v-row>
     </v-form>
 </template>
 
 <script lang="ts">
 
-    import {Vue, Component, PropSync} from "vue-property-decorator";
-    import {mapGetters} from "vuex";
+    import {Vue, Component, PropSync, Prop} from "vue-property-decorator";
+    import {mapGetters, mapState} from "vuex";
     import {mask} from "vue-the-mask";
     import {sessionIdentifiers} from "@/store/newModules/session";
     import {directorIdentifiers} from "@/store/newModules/director";
@@ -106,17 +118,21 @@
                 currentAccessCode: 'currentAccessCode',
                 currentEditCode: 'currentEditCode',
             }),
+            ...mapState('stage', {
+                stages: 'stages'
+            })
         }
     })
     export default class SessionForm extends Vue {
         @PropSync('formIsValid', {type: Boolean}) syncFormIsValid!: boolean;
+        @Prop({default: true}) readonly defaultDirectorFieldsFocus!: boolean;
 
         directorEmailSuffix = '@gibz.ch';
         formIsValid = false;
 
         sessionTitleFieldHasFocus = true;
-        directorNameFieldHasFocus = true;
-        directorEmailFieldHasFocus = true;
+        directorNameFieldHasFocus = this.defaultDirectorFieldsFocus;
+        directorEmailFieldHasFocus = this.defaultDirectorFieldsFocus;
 
         get sessionTitle() {
             return this.$store.state.session.session.title ?? '';
@@ -179,7 +195,10 @@
             this.$store.dispatch(sessionIdentifiers.actions.remoteUpdate);
         }
 
-        onDirectorChange() {
+        async onDirectorChange() {
+            if (this.directorEmail && !this.directorEmail.endsWith(this.directorEmailSuffix)) {
+                await this.$store.dispatch(directorIdentifiers.actions.update, {email: this.directorEmail + this.directorEmailSuffix})
+            }
             this.$store.dispatch(directorIdentifiers.actions.remoteUpdate);
         }
 

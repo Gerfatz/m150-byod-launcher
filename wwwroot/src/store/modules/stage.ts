@@ -180,15 +180,6 @@ const mutations = {
         state.stages.splice(index, 1, new Stage(existingStage));
     },
 
-    // addTarget(state, stageTarget: StageTarget) {
-    //     // TODO...
-    //     // const target = null;
-    //     // state.targets[stageTarget.stageId as string].push(target);
-    //    
-    //     // TODO: verify...
-    //     // state.stages.find((stage: Stage) => stage.id === stageTarget.stageId)?.targetIds.push(stageTarget.targetId);
-    // },
-
     removeTarget(state, stageTarget: StageTarget) {
         const stage = state.stages.find((stage: Stage) => stage.id === stageTarget.stageId);
         if (stage !== undefined) {

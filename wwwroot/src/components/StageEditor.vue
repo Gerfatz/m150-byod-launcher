@@ -22,7 +22,7 @@
                 </h2>
             </v-card-title>
 
-            <v-list-item v-for="target of stageTargets(stage)"
+            <v-list-item v-for="target of stageTargetsForStage(stage.id)"
                          :key="target.id"
             >
                 <v-list-item-icon>
@@ -59,7 +59,7 @@
 
             <v-card-actions class="text-right">
                 <v-btn text
-                       @click="$store.dispatch('stage/deleteStage', stage)"
+                       @click="$store.dispatch(stageIdentifiers.actions.delete, stage)"
                 >
                     <v-icon left small>fa-trash-alt</v-icon>
                     Stufe löschen
@@ -67,13 +67,13 @@
                 <v-spacer/>
                 <v-btn icon
                        :disabled="stage.sequenceNumber === 1"
-                       @click="$store.dispatch('stage/moveStageUp', stage.id)"
+                       @click="$store.dispatch(stageIdentifiers.actions.moveUp, stage.id)"
                 >
                     <v-icon small>fa-chevron-up</v-icon>
                 </v-btn>
                 <v-btn icon
                        :disabled="stage.sequenceNumber === $store.state.stage.stages.length"
-                       @click="$store.dispatch('stage/moveStageDown', stage.id)"
+                       @click="$store.dispatch(stageIdentifiers.actions.moveDown, stage.id)"
                 >
                     <v-icon small>fa-chevron-down</v-icon>
                 </v-btn>
@@ -93,12 +93,14 @@
     import {Stage} from "@/models/stage";
     import AddTargetDialog from "@/components/AddTargetDialog.vue";
     import {Id} from "@/models/idType";
+    import {stageIdentifiers} from '@/store/newModules/stage';
+    import {stageTargetIdentifiers} from "@/store/newModules/stageTarget";
 
     @Component({
             components: {AddTargetDialog},
             computed: {
-                ...mapGetters('stage', {
-                    stageTargets: 'stageTargets'
+                ...mapGetters('stageTarget', {
+                    stageTargetsForStage: 'stageTargetsForStage'
                 }),
             }
         }
@@ -106,12 +108,16 @@
     export default class StageEditor extends Vue {
         @Prop() stage!: Stage;
 
+        get stageIdentifiers() {
+            return stageIdentifiers
+        }
+
         get stageTitle() {
             return this.stage.title;
         }
 
         set stageTitle(title) {
-            this.$store.dispatch('stage/update', {id: this.stage.id, title});
+            this.$store.dispatch(stageIdentifiers.actions.update, {id: this.stage.id, title});
         }
 
         titleFieldHasFocus = true;
@@ -126,12 +132,12 @@
         }
 
         onChange() {
-            this.$store.dispatch('stage/remoteUpdate', this.stage.id);
+            this.$store.dispatch(stageIdentifiers.actions.remoteUpdate, this.stage.id);
         }
 
         removeStageTarget(targetId: Id) {
             const stageTarget = new StageTarget({stageId: this.stage.id, targetId});
-            this.$store.dispatch('stage/removeTarget', stageTarget);
+            this.$store.dispatch(stageTargetIdentifiers.actions.remove, stageTarget);
         }
 
         isScriptTarget(target: Target) {

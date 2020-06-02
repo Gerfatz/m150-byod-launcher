@@ -1,8 +1,8 @@
 <template>
-    <v-stepper v-show="stages.length > 0"
+    <v-stepper v-show="sortedStages.length > 0"
                :value="stageNumber"
                vertical>
-        <template v-for="(stage, index) in stages">
+        <template v-for="(stage, index) in sortedStages">
             <v-stepper-step :key="`step-${index}-step`"
                             :step="index+1"
                             :complete="(index+1)<stageNumber"
@@ -14,8 +14,7 @@
                                :step="index+1"
             >
                 <stage-view :stage="stage"
-                            :targets="targets[stage.id]"
-                            :tutorial-steps="tutorialSteps"
+                            :targets="stageTargetsForStage(stage.id)"
                 >
                     <template v-slot:participant-target-view="{target}">
                         <slot name="participant-target-view" :target="target"></slot>
@@ -35,19 +34,25 @@
 </template>
 
 <script lang="ts">
-    import {Vue, Component, Prop} from "vue-property-decorator";
+    import {Vue, Component} from "vue-property-decorator";
     import StageView from "@/components/StageView.vue";
-    import {Stage} from "@/models/stage";
-    import {Target} from "@/models/target";
-    import {TutorialStep} from "@/models/tutorialStep";
+    import {mapGetters, mapState} from "vuex";
 
     @Component({
         components: {StageView},
+        computed: {
+            ...mapGetters('stage', {
+                sortedStages: 'sortedStages',
+            }),
+            ...mapState('attendSession', {
+                stageNumber: 'stageNumber',
+            }),
+            ...mapGetters('stageTarget', {
+                stageTargetsForStage: 'stageTargetsForStage',
+            }),
+        }
     })
     export default class StagesStepper extends Vue {
-        @Prop({required: true}) readonly stages!: Stage[];
-        @Prop({required: true}) readonly targets!: { [key: string]: Target[] };
-        @Prop({required: true}) readonly tutorialSteps!: { [key: string]: TutorialStep[] };
-        @Prop({required: true}) readonly stageNumber!: number;
+
     }
 </script>

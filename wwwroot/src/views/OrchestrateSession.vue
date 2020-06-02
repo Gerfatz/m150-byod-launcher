@@ -1,14 +1,13 @@
 <template>
     <v-container>
-        <v-row v-show="stages.length <= 0">
-            <v-col cols="12">
-                <div>LOADING...</div>
-            </v-col>
-        </v-row>
-
         <v-row>
             <v-col cols="12">
-                <p class="headline">Teilnehmende</p>
+                <h1 class="display-2 mb-3">{{session.title}}</h1>
+                <p class="body-1">An der geführten Einrichtung mit dem Titel <span class="font-weight-bold">{{session.title}}</span>
+                    nehmen aktuell <span
+                            class="font-weight-bold">{{Object.entries(participants).length}} Personen</span> teil.</p>
+                <p>Sie können mit dem Code <span class="font-weight-bold">{{formattedAccessCode}}</span> an dieser
+                    geführten Einrichtung teilnehmen.</p>
                 <div>
                     <v-chip v-for="[participantId, displayName] in Object.entries(participants)"
                             :key="participantId"
@@ -21,22 +20,17 @@
         </v-row>
         <v-row>
             <v-col cols="12">
-                <stages-stepper v-show="stages.length > 0"
-                                :stages="stages"
-                                :targets="targets"
-                                :tutorial-steps="tutorialSteps"
-                                :stage-number="stageNumber"
-                >
+                <stages-stepper>
                     <template v-slot:directors-stage-view>
                         <v-row justify="space-around"
                                class="py-2"
                         >
-                            <v-btn @click="$store.dispatch('orchestrateSession/changeStageNumber', -1)"
+                            <v-btn @click="$store.dispatch(orchestrateSessionIdentifiers.actions.changeStageNumber, -1)"
                                    small
                             >
                                 Zum vorherigen Schritt
                             </v-btn>
-                            <v-btn @click="$store.dispatch('orchestrateSession/changeStageNumber', 1)"
+                            <v-btn @click="$store.dispatch(orchestrateSessionIdentifiers.actions.changeStageNumber, 1)"
                                    small
                             >
                                 Zum nächsten Schritt
@@ -45,7 +39,7 @@
                     </template>
 
                     <template v-slot:directors-target-view="{target}">
-                        <target-results :target="target"/>
+                        <target-results :target-id="target.id"/>
                     </template>
                 </stages-stepper>
             </v-col>
@@ -66,22 +60,35 @@
     import StagesStepper from "@/components/StagesStepper.vue";
     import {mapState} from "vuex";
     import TargetResults from "@/components/TargetResults.vue";
+    import {orchestrateSessionIdentifiers} from "@/store/newModules/orchestrateSession";
 
     @Component({
         components: {TargetResults, StagesStepper},
         computed: {
-            ...mapState('orchestrateSession', {
+            ...mapState('stage', {
                 stages: 'stages',
-                targets: 'targets',
-                tutorialSteps: 'tutorialSteps',
+            }),
+            ...mapState('orchestrateSession', {
                 participants: 'participants',
                 stageNumber: 'stageNumber',
             })
         }
     })
     export default class OrchestrateSession extends Vue {
+        get orchestrateSessionIdentifiers() {
+            return orchestrateSessionIdentifiers;
+        }
+        
+        get session(){
+            return this.$store.state.session.session;
+        }
+        
+        get formattedAccessCode(){
+            return this.session.accessCode.substr(0, 3) + "-" + this.session.accessCode.substr(3);
+        }
+
         startSession() {
-            this.$store.dispatch('orchestrateSession/startSession');
+            this.$store.dispatch(orchestrateSessionIdentifiers.actions.startSession);
         }
     }
 </script>

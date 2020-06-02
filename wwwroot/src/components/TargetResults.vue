@@ -1,20 +1,22 @@
 <template>
     <div class="mt-5">
-        <v-progress-linear :value="successfulExecutionsPercentage(target.id)"
-                           :buffer-value="totalExecutionsPercentage(target.id)"
+        <v-progress-linear :value="successfulExecutionsPercentage(targetId)"
+                           :buffer-value="totalExecutionsPercentage(targetId)"
                            :stream="true"
                            height="15"
                            rounded
                            color="#009944"
                            background-color="#cf000f"
         />
+        <div>{{totalExecutionsPercentage(targetId)}}</div>
+        <div>{{successfulExecutionsPercentage(targetId)}}</div>
     </div>
 </template>
 
 <script lang="ts">
     import {Vue, Component, Prop} from "vue-property-decorator";
-    import {Target} from "@/models/target";
     import {mapGetters} from "vuex";
+    import {Id} from "@/models/idType";
 
     @Component({
         computed: {
@@ -25,7 +27,7 @@
         }
     })
     export default class TargetResults extends Vue {
-        @Prop({required: true}) target!: Target;
+        @Prop({required: true}) targetId!: Id;
     }
 </script>
 

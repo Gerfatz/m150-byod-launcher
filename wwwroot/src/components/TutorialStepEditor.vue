@@ -37,7 +37,7 @@
 
                 <v-card-actions class="text-right">
                     <v-btn text
-                           @click="$store.dispatch('tutorialStep/deleteStep', step)"
+                           @click="$store.dispatch(tutorialStepIdentifiers.actions.delete, step)"
                     >
                         <v-icon left small>fa-trash-alt</v-icon>
                         Schritt löschen
@@ -45,13 +45,13 @@
                     <v-spacer/>
                     <v-btn icon
                            :disabled="step.sequenceNumber === 1"
-                           @click="$store.dispatch('tutorialStep/moveStepUp', step.id)"
+                           @click="$store.dispatch(tutorialStepIdentifiers.actions.moveUp, step)"
                     >
                         <v-icon small>fa-chevron-up</v-icon>
                     </v-btn>
                     <v-btn icon
                            :disabled="step.sequenceNumber === $store.state.tutorialStep.tutorialSteps.length"
-                           @click="$store.dispatch('tutorialStep/moveStepDown', step.id)"
+                           @click="$store.dispatch(tutorialStepIdentifiers.actions.moveDown, step)"
                     >
                         <v-icon small>fa-chevron-down</v-icon>
                     </v-btn>
@@ -66,6 +66,8 @@
     import CKEditor from '@ckeditor/ckeditor5-vue';
     import '@ckeditor/ckeditor5-build-classic/build/translations/de'
     import {Vue, Component, Prop} from "vue-property-decorator";
+    import {mapGetters} from "vuex";
+    import {tutorialStepIdentifiers} from "@/store/newModules/tutorialStep";
 
     import ClassicEditor from '@ckeditor/ckeditor5-editor-classic/src/classiceditor';
 
@@ -90,7 +92,7 @@
     import TableCellProperties from '@ckeditor/ckeditor5-table/src/tablecellproperties';
     import Paragraph from '@ckeditor/ckeditor5-paragraph/src/paragraph';
     import SimpleUploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/simpleuploadadapter';
-    import {mapGetters} from "vuex";
+
 
     @Component({
         components: {
@@ -105,7 +107,12 @@
                     return this.step.title;
                 },
                 set(title) {
-                    this.$store.dispatch('tutorialStep/update', {id: this.step.id, title});
+                    const payload = {
+                        id: this.step.id,
+                        tutorialTargetId: this.step.tutorialTargetId,
+                        title
+                    }
+                    this.$store.dispatch(tutorialStepIdentifiers.actions.update, payload);
                 },
             },
             instruction: {
@@ -113,7 +120,12 @@
                     return this.step.instruction;
                 },
                 set(instruction) {
-                    this.$store.dispatch('tutorialStep/update', {id: this.step.id, instruction});
+                    const payload = {
+                        id: this.step.id,
+                        tutorialTargetId: this.step.tutorialTargetId,
+                        instruction
+                    }
+                    this.$store.dispatch(tutorialStepIdentifiers.actions.update, payload);
                 },
             },
             ...mapGetters('tutorialStep', {
@@ -124,6 +136,10 @@
     export default class TutorialStepEditor extends Vue {
         @Prop() step;
         @Prop() config;
+
+        get tutorialStepIdentifiers() {
+            return tutorialStepIdentifiers;
+        }
 
         mounted() {
             console.log('step', this.step);
@@ -215,7 +231,10 @@
             const pendingActions = editor.plugins.get('PendingActions');
             pendingActions.on('change:hasAny', (event, propertyName, newValue) => {
                 if (newValue) {
-                    this.$store.dispatch('tutorialStep/updateSavingStatus', {stepId: this.step.id, isSaving: false});
+                    this.$store.dispatch(tutorialStepIdentifiers.actions.updateSavingState, {
+                        stepId: this.step.id,
+                        isSaving: false
+                    });
                 }
             });
         }
@@ -225,11 +244,18 @@
         }
 
         onChange() {
-            this.$store.dispatch('tutorialStep/remoteUpdate', this.step.id);
+            this.$store.dispatch(tutorialStepIdentifiers.actions.remoteUpdate, this.getRemoteUpdatePayload());
         }
 
         autosave() {
-            return this.$store.dispatch('tutorialStep/remoteUpdate', this.step.id);
+            return this.$store.dispatch(tutorialStepIdentifiers.actions.remoteUpdate, this.getRemoteUpdatePayload());
+        }
+
+        getRemoteUpdatePayload() {
+            return {
+                tutorialTargetId: this.step.tutorialTargetId,
+                stepId: this.step.id,
+            }
         }
 
     }

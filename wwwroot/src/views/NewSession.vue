@@ -58,6 +58,8 @@
     import SessionForm from "@/components/SessionForm";
     import {directorIdentifiers} from "@/store/newModules/director";
     import {sessionIdentifiers} from "@/store/newModules/session";
+    import {targetIdentifiers} from "@/store/newModules/target";
+    import {stageIdentifiers} from "@/store/newModules/stage";
 
     @Component({
         components: {SessionForm, StageEditor},
@@ -83,18 +85,13 @@
                         this.$store.dispatch(sessionIdentifiers.actions.create, session);
                     })
                     .then(() => {
-                        this.$store.dispatch('target/loadAll');
+                        this.$store.dispatch(targetIdentifiers.actions.load);
                     });
-
-                // this.$store.dispatch('session/createAlongNewDirector')
-                //     .then(() => {
-                //         this.$store.dispatch('target/loadAvailableTargets');
-                //     });
             }
         }
 
         addStage() {
-            this.$store.dispatch('stage/addStage');
+            this.$store.dispatch(stageIdentifiers.actions.add);
         }
 
     }

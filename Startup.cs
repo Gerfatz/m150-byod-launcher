@@ -142,8 +142,7 @@ namespace ByodLauncher
                     sb.Append(entry.Key + " " + string.Join(' ', entry.Value) + "; ");
                 }
 
-                // TODO: REMOVE!!!
-                // context.Response.Headers.Add("Content-Security-Policy", sb.ToString());
+                context.Response.Headers.Add("Content-Security-Policy", sb.ToString());
                 await next();
             });
 

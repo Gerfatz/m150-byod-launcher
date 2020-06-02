@@ -26,6 +26,7 @@
 
 <script lang="ts">
     import {Vue, Component, Prop} from "vue-property-decorator";
+    import {signalRIdentifiers} from "@/store/newModules/signalR";
 
     @Component
     export default class JoinSession extends Vue {
@@ -38,7 +39,7 @@
         }
 
         joinSession() {
-            this.$store.dispatch('signalR/joinSessionAsParticipant', this.participantId);
+            this.$store.dispatch(signalRIdentifiers.actions.joinSessionAsParticipant, this.participantId);
         }
     }
 

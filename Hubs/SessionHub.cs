@@ -54,6 +54,9 @@ namespace ByodLauncher.Hubs
             var session = await _context.Sessions
                 .Include(sess => sess.Director)
                 .SingleOrDefaultAsync(sess => sess.Id == sessionId);
+            session.CurrentStage = 0;
+            _context.Sessions.Update(session);
+
             session.Director.ConnectionId = Context.ConnectionId;
             _context.Directors.Update(session.Director);
             await _context.SaveChangesAsync();

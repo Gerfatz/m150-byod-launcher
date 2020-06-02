@@ -4,6 +4,7 @@ import {directorApi} from "@/api/directorApi";
 import {Id} from "@/models/idType";
 
 const modulePrefix = 'director/'
+
 function localIdentifier(identifier: string) {
     return identifier.substring(modulePrefix.length);
 }

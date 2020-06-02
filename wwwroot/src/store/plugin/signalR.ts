@@ -3,6 +3,10 @@ import {MutationPayload} from "vuex";
 import {Id} from "@/models/idType";
 import router from "@/router/index";
 import {TargetResultData} from "@/models/types";
+import {sessionIdentifiers} from "@/store/newModules/session";
+import {attendSessionIdentifiers} from "@/store/newModules/attendSession";
+import {signalRIdentifiers} from "@/store/newModules/signalR";
+import {orchestrateSessionIdentifiers} from "@/store/newModules/orchestrateSession";
 
 const client = new HubConnectionBuilder()
     .configureLogging(LogLevel[process.env.VUE_APP_SIGNALR_LOG_LEVEL as keyof typeof LogLevel])
@@ -13,39 +17,44 @@ export default function createSignalRPlugin() {
     return (store: any) => {
         client.on('stateChanged', (oldState, newState) => {
             const state = oldState !== newState && newState !== 'Connected' ? 'connectionClosed' : 'connectionOpened';
-            store.dispatch(`signalR/${state}`);
+            store.dispatch(signalRIdentifiers.actions[state]);
         });
 
         client.on('StartSession', (sessionId: Id) => {
-            store.dispatch('orchestrateSession/downloadSessionData', sessionId)
+            store.dispatch(sessionIdentifiers.actions.downloadAllData, sessionId)
                 .then(() => {
                     router.push({name: 'orchestrate session'});
                 })
         });
 
         client.on('JoinSession', (sessionId: Id, participantId: Id, displayName: string) => {
-            store.dispatch('attendSession/setParticipantId', participantId)
+            console.log('id', participantId);
+            console.log('displayName', displayName);
+            store.dispatch(attendSessionIdentifiers.actions.setParticipantId, participantId)
                 .then(() => {
-                    store.dispatch('attendSession/setDisplayName', displayName);
+                    return store.dispatch(attendSessionIdentifiers.actions.setDisplayName, displayName);
                 })
                 .then(() => {
-                    store.dispatch('attendSession/downloadSessionData', sessionId)
-                        .then(() => {
-                            router.push({name: "attend session"});
-                        });
+                    return store.dispatch(sessionIdentifiers.actions.downloadAllData, sessionId);
                 })
+                .then(() => {
+                    store.dispatch(attendSessionIdentifiers.actions.updateStageNumber)
+                })
+                .then(() => {
+                    router.push({name: "attend session"});
+                });
         });
 
         client.on('ParticipantJoinedSession', (participantId: string, displayName: string) => {
-            store.dispatch('orchestrateSession/participantJoined', {participantId, displayName});
+            store.dispatch(orchestrateSessionIdentifiers.actions.participantJoined, {participantId, displayName});
         });
 
         client.on('ParticipantLeftSession', (participantId: string) => {
-            store.dispatch('orchestrateSession/participantLeft', participantId);
+            store.dispatch(orchestrateSessionIdentifiers.actions.participantLeft, participantId);
         })
 
         client.on('ReceiveTargetResult', (targetId: string, participantId: string, success: boolean, details: string) => {
-            store.dispatch('orchestrateSession/addTargetResult', {
+            store.dispatch(orchestrateSessionIdentifiers.actions.addTargetResult, {
                 targetId,
                 participantId,
                 success,
@@ -54,34 +63,34 @@ export default function createSignalRPlugin() {
         });
 
         client.on('RemoveTargetResult', (targetId: string, participantId: string) => {
-            store.dispatch('orchestrateSession/removeTargetResult', {targetId, participantId});
+            store.dispatch(orchestrateSessionIdentifiers.actions.removeTargetResult, {targetId, participantId});
         })
 
         client.on('UpdateStageNumber', (stageNumber: number) => {
-            store.dispatch('attendSession/updateStageNumber', stageNumber);
+            store.dispatch(attendSessionIdentifiers.actions.updateStageNumber, stageNumber);
         });
 
         client.start()
             .then(() => {
-                store.dispatch('signalR/connectionOpened');
+                store.dispatch(signalRIdentifiers.actions.connectionOpened);
             })
             .catch(error => {
-                store.dispatch('signalR/connectionError', error);
+                store.dispatch(signalRIdentifiers.actions.connectionError, error);
             });
 
         store.subscribe((mutation: MutationPayload, state: any) => {
             if (state.signalR.connected) {
                 switch (mutation.type) {
-                    case 'signalR/START_SESSION':
+                    case signalRIdentifiers.mutations.startSession:
                         client.invoke('StartSession', mutation.payload);
                         break;
-                    case 'signalR/JOIN_SESSION':
+                    case signalRIdentifiers.mutations.joinSession:
                         client.invoke('JoinSession', ...mutation.payload);
                         break;
-                    case 'signalR/JOIN_SESSION_AS_PARTICIPANT':
+                    case signalRIdentifiers.mutations.joinSessionAsParticipant:
                         client.invoke('JoinSessionAsParticipant', state.signalR.participantId);
                         break;
-                    case 'orchestrateSession/UPDATE_CURRENT_STAGE_NUMBER':
+                    case orchestrateSessionIdentifiers.mutations.updateCurrentStageNumber:
                         client.invoke('UpdateStageNumber', state.signalR.sessionId, mutation.payload);
                         break;
                 }
