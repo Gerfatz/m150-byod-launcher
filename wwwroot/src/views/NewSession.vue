@@ -14,7 +14,9 @@
             </v-col>
         </v-row>
 
-        <session-form :form-is-valid.sync="formIsValid"/>
+        <session-form :form-is-valid.sync="formIsValid"
+                      @start-session="startSession"
+        />
 
         <v-row v-if="session.id === null">
             <v-col class="text-center">
@@ -22,6 +24,7 @@
                        color="primary"
                        large
                        @click="createDirectorAndSession"
+                       :loading="isLoading"
                 >
                     <v-icon left>fa-save</v-icon>
                     Geführte Einrichtung erstellen
@@ -60,10 +63,14 @@
     import {sessionIdentifiers} from "@/store/newModules/session";
     import {targetIdentifiers} from "@/store/newModules/target";
     import {stageIdentifiers} from "@/store/newModules/stage";
+    import {signalRIdentifiers} from "@/store/newModules/signalR";
 
     @Component({
         components: {SessionForm, StageEditor},
         computed: {
+            ...mapGetters({
+                isLoading: 'isLoading',
+            }),
             ...mapState('session', {
                 session: 'session'
             }),
@@ -92,6 +99,10 @@
 
         addStage() {
             this.$store.dispatch(stageIdentifiers.actions.add);
+        }
+
+        startSession() {
+            this.$store.dispatch(signalRIdentifiers.actions.startSession, this.session.id);
         }
 
     }

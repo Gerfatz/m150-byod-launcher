@@ -7,6 +7,7 @@ import {stageTargetIdentifiers} from "@/store/newModules/stageTarget";
 import {Target} from "@/models/target";
 import {tutorialStepIdentifiers} from "@/store/newModules/tutorialStep";
 import {directorIdentifiers} from "@/store/newModules/director";
+import {rootIdentifiers} from "@/store/identifiers";
 
 const modulePrefix = 'session/'
 
@@ -53,10 +54,14 @@ const getters = {
 } as GetterTree<SessionState, any>;
 
 const actions = {
-    CREATE({commit}, session: Session) {
+    CREATE({dispatch, commit}, session: Session) {
+        dispatch(rootIdentifiers.actions.startLoading, null, {root: true});
         return sessionApi.createSession(session)
             .then(session => {
                 commit(localIdentifier(sessionIdentifiers.mutations.setSession), session);
+            })
+            .finally(() => {
+                dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
             });
     },
 
@@ -66,21 +71,30 @@ const actions = {
         commit(localIdentifier(sessionIdentifiers.mutations.setSession), session);
     },
 
-    REMOTE_UPDATE({state, commit}) {
+    REMOTE_UPDATE({state, dispatch, commit}) {
         if (state.session.id != null) {
+            dispatch(rootIdentifiers.actions.startLoading, null, {root: true});
             const session = state.session;
             return sessionApi.updateSession(session)
                 .then(() => {
                     commit(localIdentifier(sessionIdentifiers.mutations.setSession), session);
+                })
+                .finally(() => {
+                    dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
                 });
         }
     },
 
-    LOAD_BY_ACCESS_CODE(_, accessCode: string) {
-        return sessionApi.getByAccessCode(accessCode);
+    LOAD_BY_ACCESS_CODE({dispatch}, accessCode: string) {
+        dispatch(rootIdentifiers.actions.startLoading, null, {root: true});
+        return sessionApi.getByAccessCode(accessCode)
+            .finally(() => {
+                dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
+            });
     },
 
-    LOAD_BY_EDIT_CODE({commit}, editCode: string) {
+    LOAD_BY_EDIT_CODE({dispatch, commit}, editCode: string) {
+        dispatch(rootIdentifiers.actions.startLoading, null, {root: true});
         return sessionApi.getByEditCode((editCode))
             .then(sessions => {
                 if (sessions.length === 1) {
@@ -89,9 +103,13 @@ const actions = {
                 }
                 return null;
             })
+            .finally(() => {
+                dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
+            });
     },
 
     DOWNLOAD_ALL_DATA({state, rootState, commit, dispatch}, sessionId: Id) {
+        dispatch(rootIdentifiers.actions.startLoading, null, {root: true});
         return sessionApi.getSession(sessionId)
             .then(session => {
                 commit(localIdentifier(sessionIdentifiers.mutations.setSession), session);
@@ -124,6 +142,9 @@ const actions = {
                 }
                 return Promise.all(tutorialStepPromises);
             })
+            .finally(() => {
+                dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
+            });
     }
 
 } as ActionTree<SessionState, any>;

@@ -25,15 +25,19 @@
                         <v-row justify="space-around"
                                class="py-2"
                         >
-                            <v-btn @click="$store.dispatch(orchestrateSessionIdentifiers.actions.changeStageNumber, -1)"
+                            <v-btn v-if="stageNumber > 1"
+                                   @click="$store.dispatch(orchestrateSessionIdentifiers.actions.changeStageNumber, -1)"
                                    small
                             >
-                                Zum vorherigen Schritt
+                                <v-icon left>fa-caret-up</v-icon>
+                                Zur vorherigen Stufe
                             </v-btn>
-                            <v-btn @click="$store.dispatch(orchestrateSessionIdentifiers.actions.changeStageNumber, 1)"
+                            <v-btn v-if="stageNumber < stages.length"
+                                   @click="$store.dispatch(orchestrateSessionIdentifiers.actions.changeStageNumber, 1)"
                                    small
                             >
-                                Zum nächsten Schritt
+                                Zur nächsten Stufe
+                                <v-icon right>fa-caret-down</v-icon>
                             </v-btn>
                         </v-row>
                     </template>
@@ -78,12 +82,12 @@
         get orchestrateSessionIdentifiers() {
             return orchestrateSessionIdentifiers;
         }
-        
-        get session(){
+
+        get session() {
             return this.$store.state.session.session;
         }
-        
-        get formattedAccessCode(){
+
+        get formattedAccessCode() {
             return this.session.accessCode.substr(0, 3) + "-" + this.session.accessCode.substr(3);
         }
 

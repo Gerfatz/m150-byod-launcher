@@ -2,6 +2,7 @@ import {GetterTree, MutationTree, ActionTree} from "vuex";
 import {Director} from "@/models/director";
 import {directorApi} from "@/api/directorApi";
 import {Id} from "@/models/idType";
+import {rootIdentifiers} from "@/store/identifiers";
 
 const modulePrefix = 'director/'
 
@@ -35,10 +36,14 @@ const getters = {
 } as GetterTree<DirectorState, any>;
 
 const actions = {
-    CREATE({commit}, director: Director) {
+    CREATE({commit, dispatch}, director: Director) {
+        dispatch(rootIdentifiers.actions.startLoading, null, {root: true});
         return directorApi.createDirector(director)
             .then(result => {
                 commit(localIdentifier(directorIdentifiers.mutations.setDirector), result);
+            })
+            .finally(() => {
+                dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
             });
     },
 
@@ -48,20 +53,28 @@ const actions = {
         commit(localIdentifier(directorIdentifiers.mutations.setDirector), director);
     },
 
-    REMOTE_UPDATE({state, commit}) {
+    REMOTE_UPDATE({state, dispatch, commit}) {
         if (state.director.id != null) {
+            dispatch(rootIdentifiers.actions.startLoading, null, {root: true});
             const director = state.director;
             return directorApi.updateDirector(director)
                 .then(() => {
                     commit(localIdentifier(directorIdentifiers.mutations.setDirector), director);
+                })
+                .finally(() => {
+                    dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
                 });
         }
     },
 
-    LOAD({commit}, directorId: Id) {
+    LOAD({dispatch, commit}, directorId: Id) {
+        dispatch(rootIdentifiers.actions.startLoading, null, {root: true});
         directorApi.getDirector(directorId)
             .then(director => {
                 commit(localIdentifier(directorIdentifiers.mutations.setDirector), director);
+            })
+            .finally(() => {
+                dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
             });
     }
 

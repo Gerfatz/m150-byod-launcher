@@ -92,6 +92,7 @@
                 <v-btn large
                        color="primary"
                        @click="$emit('start-session')"
+                       :loading="isLoading"
                 >
                     <v-icon left>fa-play</v-icon>
                     Einrichtung starten
@@ -114,6 +115,9 @@
     @Component({
         directives: {mask},
         computed: {
+            ...mapGetters({
+                isLoading: 'isLoading',
+            }),
             ...mapGetters('session', {
                 currentAccessCode: 'currentAccessCode',
                 currentEditCode: 'currentEditCode',

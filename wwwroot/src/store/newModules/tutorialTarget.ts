@@ -2,6 +2,7 @@ import {TutorialTarget} from "@/models/tutorialTarget";
 import {ActionTree, GetterTree, MutationTree} from "vuex";
 import {targetApi} from "@/api/targetApi";
 import {tutorialStepIdentifiers} from "@/store/newModules/tutorialStep";
+import {rootIdentifiers} from "@/store/identifiers";
 
 const modulePrefix = 'tutorialTarget/'
 
@@ -34,6 +35,7 @@ const getters = {} as GetterTree<TutorialTargetState, any>;
 
 const actions = {
     CREATE({state, commit, dispatch}) {
+        dispatch(rootIdentifiers.actions.startLoading, null, {root: true});
         return targetApi.createTarget(state.newTutorialTarget)
             .then(tutorialTarget => {
                 commit(localIdentifier(tutorialTargetIdentifiers.mutations.set), tutorialTarget);
@@ -42,6 +44,9 @@ const actions = {
             .then(tutorialTarget => {
                 dispatch(tutorialStepIdentifiers.actions.initialize, tutorialTarget.id, {root: true});
             })
+            .finally(() => {
+                dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
+            });
     },
 
     UPDATE({state, commit}, updateData: Partial<TutorialTarget>) {
@@ -50,12 +55,16 @@ const actions = {
         commit(localIdentifier(tutorialTargetIdentifiers.mutations.set), tutorialTarget);
     },
 
-    REMOTE_UPDATE({state, commit}) {
+    REMOTE_UPDATE({state, dispatch, commit}) {
         if (state.newTutorialTarget.id != null) {
             const tutorialTarget = state.newTutorialTarget;
+            dispatch(rootIdentifiers.actions.startLoading, null, {root: true});
             return targetApi.updateTarget(tutorialTarget)
                 .then(() => {
                     commit(localIdentifier(tutorialTargetIdentifiers.mutations.set), tutorialTarget);
+                })
+                .finally(() => {
+                    dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
                 });
         }
     },

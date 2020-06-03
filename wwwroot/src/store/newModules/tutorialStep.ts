@@ -3,6 +3,7 @@ import {TutorialStep} from "@/models/tutorialStep";
 import {ActionTree, GetterTree, MutationTree} from "vuex";
 import {Id} from "@/models/idType";
 import {tutorialStepApi} from "@/api/tutorialStepApi";
+import {rootIdentifiers} from "@/store/identifiers";
 
 const modulePrefix = 'tutorialStep/'
 
@@ -73,21 +74,29 @@ const actions = {
         commit(localIdentifier(tutorialStepIdentifiers.mutations.initialize), tutorialTargetId);
     },
 
-    LOAD({commit}, tutorialTargetId: Id) {
-        tutorialStepApi.getTutorialSteps(tutorialTargetId)
+    LOAD({dispatch, commit}, tutorialTargetId: Id) {
+        dispatch(rootIdentifiers.actions.startLoading, null, {root: true});
+        return tutorialStepApi.getTutorialSteps(tutorialTargetId)
             .then(tutorialSteps => {
                 commit(localIdentifier(tutorialStepIdentifiers.mutations.set), {tutorialTargetId, tutorialSteps});
             })
+            .finally(() => {
+                dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
+            });
     },
 
-    ADD({commit, state, rootState}) {
+    ADD({rootState, state, dispatch, commit}) {
         const tutorialTargetId = rootState.tutorialTarget.newTutorialTarget.id;
         const sequenceNumber = (state.tutorialSteps[tutorialTargetId]?.length ?? 0) + 1;
         const title = `Schritt ${sequenceNumber}`;
         const tutorialStep = new TutorialStep({tutorialTargetId, sequenceNumber, title});
+        dispatch(rootIdentifiers.actions.startLoading, null, {root: true});
         return tutorialStepApi.addTutorialStep(tutorialStep)
             .then(tutorialStep => {
                 commit(localIdentifier(tutorialStepIdentifiers.mutations.add), tutorialStep);
+            })
+            .finally(() => {
+                dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
             });
     },
 
@@ -105,12 +114,13 @@ const actions = {
         commit(localIdentifier(tutorialStepIdentifiers.mutations.replace), tutorialStep);
     },
 
-    REMOTE_UPDATE({state, commit}, {tutorialTargetId, stepId}: { tutorialTargetId: Id; stepId: Id }) {
+    REMOTE_UPDATE({state, dispatch, commit}, {tutorialTargetId, stepId}: { tutorialTargetId: Id; stepId: Id }) {
         const tutorialStep = state.tutorialSteps[tutorialTargetId as string]
             .find((step: TutorialStep) => step.id === stepId);
         if (tutorialStep === undefined) {
             throw Error(`Provided invalid value for id properties. No tutorial step with id '${stepId}' within tutorial target with id '${tutorialTargetId}' found.`);
         }
+        dispatch(rootIdentifiers.actions.startLoading, null, {root: true});
         return tutorialStepApi.updateTutorialStep(tutorialStep)
             .then(() => {
                 commit(localIdentifier(tutorialStepIdentifiers.mutations.replace), tutorialStep);
@@ -118,13 +128,20 @@ const actions = {
                     stepId: tutorialStep.id,
                     isSaving: true
                 });
+            })
+            .finally(() => {
+                dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
             });
     },
 
-    DELETE({commit}, step: TutorialStep) {
+    DELETE({dispatch, commit}, step: TutorialStep) {
+        dispatch(rootIdentifiers.actions.startLoading, null, {root: true});
         return tutorialStepApi.deleteTutorialStep(step)
             .then(step => {
                 commit(localIdentifier(tutorialStepIdentifiers.mutations.delete), step);
+            })
+            .finally(() => {
+                dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
             });
     },
 

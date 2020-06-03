@@ -15,6 +15,39 @@ import createSignalRPlugin from "@/store/plugin/signalR";
 Vue.use(Vuex);
 
 export default new Vuex.Store({
+    state: {
+        isLoading: false,
+        loadingCounter: 0,
+    },
+    getters: {
+        isLoading: (state) => {
+            return state.loadingCounter > 0;
+        }
+    },
+    actions: {
+        START_LOADING({commit}) {
+            commit('SET_LOADING_STATE', true);
+        },
+
+        FINISH_LOADING({commit}) {
+            commit('SET_LOADING_STATE', false);
+        },
+
+        SET_LOADING({commit}, isLoading: boolean) {
+            commit('SET_LOADING_STATE', isLoading);
+        }
+
+    },
+    mutations: {
+        SET_LOADING_STATE(state, newLoadingStage: boolean) {
+            if (newLoadingStage) {
+                state.loadingCounter++;
+            } else {
+                state.loadingCounter--;
+            }
+            state.isLoading = newLoadingStage;
+        }
+    },
     modules: {
         director,
         session,

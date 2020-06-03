@@ -3,6 +3,7 @@ import {ActionTree, GetterTree, MutationTree} from "vuex";
 import {Id} from "@/models/idType";
 import {targetResultApi} from "@/api/targetResult";
 import {ParticipantTargetResults, TargetResult, TargetResultData} from "@/models/types";
+import {rootIdentifiers} from "@/store/identifiers";
 
 const modulePrefix = 'attendSession/'
 
@@ -63,7 +64,8 @@ const actions = {
         commit(localIdentifier(attendSessionIdentifiers.mutations.updateStageNumber), stageNumber);
     },
 
-    SEND_TARGET_RESULT({commit, state, getters}, {targetId, success}: { targetId: Id; success: boolean }) {
+    SEND_TARGET_RESULT({state, getters, dispatch, commit}, {targetId, success}: { targetId: Id; success: boolean }) {
+        dispatch(rootIdentifiers.actions.startLoading, null, {root: true});
         const currentTargetResult = getters.targetResult(targetId);
         if (currentTargetResult?.success === success) {
             const targetResultData = {
@@ -75,6 +77,9 @@ const actions = {
             targetResultApi.removeTargetResult(targetResultData)
                 .then(targetResult => {
                     commit(localIdentifier(attendSessionIdentifiers.mutations.removeTargetResult), targetResult);
+                })
+                .finally(() => {
+                    dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
                 });
         } else {
             targetResultApi.createTargetResult({
@@ -85,6 +90,9 @@ const actions = {
             } as TargetResultData)
                 .then(targetResult => {
                     commit(localIdentifier(attendSessionIdentifiers.mutations.addTargetResult), targetResult);
+                })
+                .finally(() => {
+                    dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
                 });
         }
     }

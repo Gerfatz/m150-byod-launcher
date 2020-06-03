@@ -1,6 +1,7 @@
 import {GetterTree, MutationTree, ActionTree} from "vuex";
 import {Target} from "@/models/target";
 import {targetApi} from "@/api/targetApi";
+import {rootIdentifiers} from "@/store/identifiers";
 
 const modulePrefix = 'target/';
 
@@ -28,10 +29,14 @@ const state = {
 const getters = {} as GetterTree<TargetState, any>;
 
 const actions = {
-    LOAD({commit}) {
+    LOAD({dispatch, commit}) {
+        dispatch(rootIdentifiers.actions.startLoading, null, {root: true});
         return targetApi.getTargets()
             .then(targets => {
                 commit(localIdentifier(targetIdentifiers.mutations.set), targets)
+            })
+            .finally(() => {
+                dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
             })
     }
 } as ActionTree<TargetState, any>;

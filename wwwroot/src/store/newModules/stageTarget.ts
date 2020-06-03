@@ -4,6 +4,7 @@ import {ActionTree, GetterTree, MutationTree} from "vuex";
 import {Id} from "@/models/idType";
 import {stageTargetApi} from "@/api/stageTargetApi";
 import {StageTarget} from "@/models/stageTarget";
+import {rootIdentifiers} from "@/store/identifiers";
 
 const modulePrefix = 'stageTarget/';
 
@@ -49,22 +50,31 @@ const getters = {
 } as GetterTree<StageTargetState, any>
 
 const actions = {
-    LOAD({commit}, stageId: Id) {
+    LOAD({dispatch, commit}, stageId: Id) {
+        dispatch(rootIdentifiers.actions.startLoading, null, {root: true});
         return stageTargetApi.getStageTargets(stageId)
             .then(targets => {
                 commit(localIdentifier(stageTargetIdentifiers.mutations.set), {stageId, targets});
             })
-    },
-
-    ADD({commit}, stageTarget: StageTarget) {
-        const stageId = stageTarget.stageId;
-        return stageTargetApi.addStageTarget(stageTarget)
-            .then(target => {
-                commit(localIdentifier(stageTargetIdentifiers.mutations.add), {stageId, target});
+            .finally(() => {
+                dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
             });
     },
 
-    REMOVE({commit, state}, stageTarget: StageTarget) {
+    ADD({dispatch, commit}, stageTarget: StageTarget) {
+        const stageId = stageTarget.stageId;
+        dispatch(rootIdentifiers.actions.startLoading, null, {root: true});
+        return stageTargetApi.addStageTarget(stageTarget)
+            .then(target => {
+                commit(localIdentifier(stageTargetIdentifiers.mutations.add), {stageId, target});
+            })
+            .finally(() => {
+                dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
+            });
+    },
+
+    REMOVE({state, dispatch, commit}, stageTarget: StageTarget) {
+        dispatch(rootIdentifiers.actions.startLoading, null, {root: true});
         return stageTargetApi.removeStageTarget(stageTarget)
             .then(target => {
                 const targetIndex = state.stageTargets[stageTarget.stageId as string]
@@ -76,6 +86,9 @@ const actions = {
                     }
                     commit(localIdentifier(stageTargetIdentifiers.mutations.remove), payload);
                 }
+            })
+            .finally(() => {
+                dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
             });
     }
 } as ActionTree<StageTargetState, any>

@@ -68,6 +68,7 @@
                 <v-btn text
                        @click="confirm"
                        :disabled="selectedTargets.length === 0"
+                       :loading="isLoading"
                 >
                     <span v-if="selectedTargets.length < 2">Schritt hinzufügen</span>
                     <span v-else>{{selectedTargets.length}} Schritte hinzufügen</span>
@@ -95,6 +96,9 @@
 
     @Component({
         computed: {
+            ...mapGetters({
+                isLoading: 'isLoading',
+            }),
             ...mapGetters('stageTarget', {
                 availableStageTargetsForStage: 'availableStageTargetsForStage',
             })

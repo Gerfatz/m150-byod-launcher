@@ -2,6 +2,7 @@ import {GetterTree, MutationTree, ActionTree} from "vuex";
 import {Stage} from "@/models/stage";
 import {stageApi} from "@/api/stageApi";
 import {Id} from "@/models/idType";
+import {rootIdentifiers} from "@/store/identifiers";
 
 const modulePrefix = 'stage/';
 
@@ -43,21 +44,30 @@ const getters = {
 } as GetterTree<StageState, any>;
 
 const actions = {
-    LOAD({commit}, sessionId: Id) {
-        return stageApi.getStages(sessionId).then(stages => {
-            commit(localIdentifier(stageIdentifiers.mutations.setStages), stages);
-            return stages;
-        })
+    LOAD({dispatch, commit}, sessionId: Id) {
+        dispatch(rootIdentifiers.actions.startLoading, null, {root: true});
+        return stageApi.getStages(sessionId)
+            .then(stages => {
+                commit(localIdentifier(stageIdentifiers.mutations.setStages), stages);
+                return stages;
+            })
+            .finally(() => {
+                dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
+            });
     },
 
-    ADD({rootState, state, commit}) {
+    ADD({rootState, state, dispatch, commit}) {
         const sessionId = rootState.session.session.id;
         const sequenceNumber = state.stages.length + 1;
         const title = `Stufe ${sequenceNumber}`;
         const stage = new Stage({title, sequenceNumber});
+        dispatch(rootIdentifiers.actions.startLoading, null, {root: true});
         return stageApi.createStage(sessionId, stage)
             .then(newStage => {
                 commit(localIdentifier(stageIdentifiers.mutations.add), newStage);
+            })
+            .finally(() => {
+                dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
             });
     },
 
@@ -69,27 +79,33 @@ const actions = {
         if (stage === undefined) {
             throw Error(`Provided invalid value for 'id' property. No stage with id '${updateData.id}' found.`);
         }
-        console.log('stage', stage);
         stage.update(updateData);
         commit(localIdentifier(stageIdentifiers.mutations.replace), stage);
     },
 
-    REMOTE_UPDATE({state, commit}, id: Id) {
+    REMOTE_UPDATE({state, dispatch, commit}, id: Id) {
         const stage = state.stages.find((stage: Stage) => stage.id === id);
         if (stage === undefined) {
             throw Error(`Provided invalid value for 'id' property. No stage with id '${id}' found.`);
         }
+        dispatch(rootIdentifiers.actions.startLoading, null, {root: true});
         return stageApi.updateStage(stage)
             .then(() => {
                 commit(localIdentifier(stageIdentifiers.mutations.replace), stage);
+            })
+            .finally(() => {
+                dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
             });
     },
 
-    DELETE({commit}, stage: Stage) {
+    DELETE({dispatch, commit}, stage: Stage) {
+        dispatch(rootIdentifiers.actions.startLoading, null, {root: true});
         return stageApi.deleteStage(stage)
             .then(stage => {
                 commit(localIdentifier(stageIdentifiers.mutations.delete), stage);
-            })
+            }).finally(() => {
+                dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
+            });
     },
 
     MOVE_UP({state, dispatch}, stageId: Id) {
@@ -100,7 +116,7 @@ const actions = {
             if (otherStage === undefined) {
                 throw Error(`Could not move stage up. No other stage with sequenceNumber ${stage.sequenceNumber - 1} to move down found.`)
             }
-
+            dispatch(rootIdentifiers.actions.startLoading, null, {root: true});
             return Promise.all([
                 dispatch(localIdentifier(stageIdentifiers.actions.update), {
                     ...stage,
@@ -110,10 +126,14 @@ const actions = {
                     ...otherStage,
                     sequenceNumber: otherStage.sequenceNumber + 1
                 })
-            ]).then(() => {
-                dispatch(localIdentifier(stageIdentifiers.actions.remoteUpdate), stage.id);
-                dispatch(localIdentifier(stageIdentifiers.actions.remoteUpdate), otherStage.id);
-            });
+            ])
+                .then(() => {
+                    dispatch(localIdentifier(stageIdentifiers.actions.remoteUpdate), stage.id);
+                    dispatch(localIdentifier(stageIdentifiers.actions.remoteUpdate), otherStage.id);
+                })
+                .finally(() => {
+                    dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
+                });
         }
     },
 
@@ -125,7 +145,7 @@ const actions = {
             if (otherStage === undefined) {
                 throw Error(`Could not move stage down. No other stage with sequenceNumber ${stage.sequenceNumber + 1} to move up found.`)
             }
-
+            dispatch(rootIdentifiers.actions.startLoading, null, {root: true});
             return Promise.all([
                 dispatch(localIdentifier(stageIdentifiers.actions.update), {
                     ...stage,
@@ -135,10 +155,14 @@ const actions = {
                     ...otherStage,
                     sequenceNumber: otherStage.sequenceNumber - 1
                 })
-            ]).then(() => {
-                dispatch(localIdentifier(stageIdentifiers.actions.remoteUpdate), stage.id);
-                dispatch(localIdentifier(stageIdentifiers.actions.remoteUpdate), otherStage.id);
-            });
+            ])
+                .then(() => {
+                    dispatch(localIdentifier(stageIdentifiers.actions.remoteUpdate), stage.id);
+                    dispatch(localIdentifier(stageIdentifiers.actions.remoteUpdate), otherStage.id);
+                })
+                .finally(() => {
+                    dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
+                });
         }
     },
 

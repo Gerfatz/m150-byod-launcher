@@ -8,8 +8,6 @@
                            color="#009944"
                            background-color="#cf000f"
         />
-        <div>{{totalExecutionsPercentage(targetId)}}</div>
-        <div>{{successfulExecutionsPercentage(targetId)}}</div>
     </div>
 </template>
 
