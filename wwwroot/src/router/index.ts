@@ -7,6 +7,7 @@ import JoinSession from '../views/JoinSession.vue'
 import AttendSession from '../views/AttendSession.vue'
 import OrchestrateSession from "@/views/OrchestrateSession.vue";
 import EditSession from "@/views/EditSession.vue";
+import Login from "@/views/Login.vue";
 
 Vue.use(VueRouter);
 
@@ -27,12 +28,6 @@ const routes = [
         component: EditSession,
         props: true
     },
-    // {
-    //     path: '/edit-session/:editCode',
-    //     name: 'edit session',
-    //     component: EditSession,
-    //     props: true
-    // },
     {
         path: '/new-tutorial-target',
         name: 'new tutorial target',
@@ -54,6 +49,11 @@ const routes = [
         name: 'attend session',
         component: AttendSession,
     },
+    {
+        path: '/login',
+        name: 'login',
+        component: Login
+    }
     // {
     //   path: '/about',
     //   name: 'About',

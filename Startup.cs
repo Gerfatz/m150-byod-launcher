@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using ByodLauncher.Hubs;
 using ByodLauncher.Models;
 using ByodLauncher.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -48,19 +50,40 @@ namespace ByodLauncher
                 options.Cookie.SameSite = SameSiteMode.Strict;
             });
 
-            services.AddAuthentication("SimulatedAuthentication")
-                .AddCookie("SimulatedAuthentication", options =>
+            services.AddAuthentication(options =>
+                {
+                    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                })
+                .AddCookie(options =>
                 {
                     options.Cookie.HttpOnly = true;
                     options.Cookie.IsEssential = true;
                     options.Cookie.Name = "ByodLauncherAuth";
                     options.Cookie.SameSite = SameSiteMode.Strict;
                     options.LoginPath = "/Login";
+
+                    options.Events.OnRedirectToAccessDenied =
+                        options.Events.OnRedirectToLogin = ctx =>
+                        {
+                            if (ctx.Request.Path.StartsWithSegments("/api") &&
+                                ctx.Response.StatusCode == StatusCodes.Status200OK)
+                            {
+                                ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                            }
+                            else
+                            {
+                                ctx.Response.Redirect(ctx.RedirectUri);
+                            }
+
+                            return Task.CompletedTask;
+                        };
                 });
 
             var connectionString = Configuration.GetConnectionString("MariaDb");
             services.AddDbContext<ByodLauncherContext>(options => options
-                // replace with your connection string
                 .UseMySql(connectionString, mySqlOptions => mySqlOptions
                     .ServerVersion(new Version(10, 4, 7), ServerType.MariaDb)
                     .EnableRetryOnFailure()
@@ -147,7 +170,6 @@ namespace ByodLauncher
             });
 
             app.UseRouting();
-            app.UseAuthentication();
             app.UseAuthorization();
             app.UseSession();
 

@@ -15,10 +15,11 @@
                                   @change="onChange"
                     />
                     <h2 v-else
-                        class="title"
+                        class="title editable-content"
                         @click="titleFieldHasFocus = !titleFieldHasFocus"
                     >
                         {{title}}
+                        <v-icon>fa-pencil-alt</v-icon>
                     </h2>
                 </v-card-title>
 
@@ -50,7 +51,7 @@
                         <v-icon small>fa-chevron-up</v-icon>
                     </v-btn>
                     <v-btn icon
-                           :disabled="step.sequenceNumber === $store.state.tutorialStep.tutorialSteps.length"
+                           :disabled="step.sequenceNumber === $store.state.tutorialStep.tutorialSteps[$store.state.tutorialTarget.newTutorialTarget.id].length"
                            @click="$store.dispatch(tutorialStepIdentifiers.actions.moveDown, step)"
                     >
                         <v-icon small>fa-chevron-down</v-icon>
@@ -139,10 +140,6 @@
 
         get tutorialStepIdentifiers() {
             return tutorialStepIdentifiers;
-        }
-
-        mounted() {
-            console.log('step', this.step);
         }
 
         validForm = false;

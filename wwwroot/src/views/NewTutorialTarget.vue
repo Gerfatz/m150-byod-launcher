@@ -2,6 +2,13 @@
     <v-container>
         <v-form v-model="formIsValid">
             <v-row>
+                <v-col>
+                    <h1 class="display-3 font-weight-thin my-5">Tutorial erstellen</h1>
+                    <p class="body-1">Auf dieser Seite können Sie ein Tutorial erstellen. Dieses Tutorial kann später
+                        als einzelner Schritt bei der Erstellung einer geführten Einrichtung hinzugefügt werden.</p>
+                </v-col>
+            </v-row>
+            <v-row>
                 <v-col cols="12">
                     <v-text-field v-if="titleFieldHasFocus"
                                   v-model="title"
@@ -69,9 +76,12 @@
             </v-col>
 
             <v-col v-if="newTutorialTarget.id"
-                   class="text-right"
+                   class="text-center"
             >
-                <v-btn text @click="addTutorialStep">
+                <v-btn text
+                       @click="addTutorialStep"
+                       :loading="isLoading"
+                >
                     <v-icon left>fa-plus</v-icon>
                     Schritt hinzufügen
                 </v-btn>
@@ -91,6 +101,9 @@
     @Component({
         components: {TutorialStepEditor},
         computed: {
+            ...mapGetters({
+                isLoading: 'isLoading',
+            }),
             ...mapState('tutorialTarget', {
                 newTutorialTarget: 'newTutorialTarget'
             }),

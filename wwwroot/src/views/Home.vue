@@ -340,15 +340,16 @@
                 font-weight: normal;
             }
         }
+        
+        .v-messages__message {
+            text-align: center;
+        }
     }
 
     .centered-input .v-messages {
         text-align: center;
     }
 
-    .v-messages__message {
-        text-align: center;
-    }
 
     .divider-with-space {
         margin: 70px 0;

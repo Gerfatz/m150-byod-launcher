@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
@@ -24,10 +25,13 @@ namespace ByodLauncher.Controllers
             var expectedAuthToken = _configuration["Authentication:DummyAuthenticationToken"];
             if (!string.IsNullOrEmpty(username) && expectedAuthToken.Equals(authToken))
             {
-                var userClaims = new List<Claim> {new Claim(ClaimTypes.Name, username)};
-                var identity = new ClaimsIdentity(userClaims, "SimulatedAuthentication");
-                var userPrincipal = new ClaimsPrincipal(new[] {identity});
-                await HttpContext.SignInAsync(userPrincipal);
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, username)
+                };
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var claimsPrincipal = new ClaimsPrincipal(new[] {claimsIdentity});
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
             }
             else
             {

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ByodLauncher.Models;
 using ByodLauncher.Models.Dto;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 
 namespace ByodLauncher.Controllers
@@ -24,7 +25,7 @@ namespace ByodLauncher.Controllers
             _mapper = mapper;
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DirectorDto>>> GetDirectorDto()
         {
@@ -83,7 +84,7 @@ namespace ByodLauncher.Controllers
             return CreatedAtAction("GetDirectorDto", new {id = directorDto.Id}, _mapper.Map<DirectorDto>(director));
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
         [HttpDelete("{id}")]
         public async Task<ActionResult<DirectorDto>> DeleteDirectorDto(Guid id)
         {

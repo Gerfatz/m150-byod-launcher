@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using ByodLauncher.Models;
 using ByodLauncher.Models.Dto;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -45,7 +46,7 @@ namespace ByodLauncher.Controllers
             return _mapper.Map<TutorialStepDto>(tutorialStep);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResult<TutorialStepDto>> PostTutorialStep(Guid tutorialTargetId,
             TutorialStepDto tutorialStepDto)
@@ -62,7 +63,7 @@ namespace ByodLauncher.Controllers
             return _mapper.Map<TutorialStepDto>(tutorialStep);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
         [HttpPut("{tutorialStepId}")]
         public async Task<IActionResult> PutTutorialStep(Guid tutorialTargetId, Guid tutorialStepId,
             TutorialStepDto tutorialStepDto)
@@ -97,7 +98,7 @@ namespace ByodLauncher.Controllers
             return NoContent();
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
         [HttpDelete("{tutorialStepId}")]
         public async Task<ActionResult<TutorialStepDto>> DeleteTutorialStep(Guid tutorialTargetId, Guid tutorialStepId)
         {

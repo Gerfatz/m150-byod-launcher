@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using ByodLauncher.Models;
 using ByodLauncher.Models.Dto;
 using ByodLauncher.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 
 namespace ByodLauncher.Controllers
@@ -111,7 +112,7 @@ namespace ByodLauncher.Controllers
             return CreatedAtAction("GetSession", new {id = sessionDto.Id}, _mapper.Map<SessionDto>(session));
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
         [HttpDelete("{id}")]
         public async Task<ActionResult<SessionDto>> DeleteSession(Guid id)
         {

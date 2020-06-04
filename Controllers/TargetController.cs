@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ByodLauncher.Models;
 using ByodLauncher.Models.Dto;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 
@@ -54,7 +55,7 @@ namespace ByodLauncher.Controllers
             return _mapper.Map<TargetDto>(target);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTarget(Guid id, TargetDto targetDto)
         {
@@ -83,7 +84,7 @@ namespace ByodLauncher.Controllers
             return NoContent();
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResult<TargetDto>> PostTarget(TargetDto targetDto)
         {
@@ -100,7 +101,7 @@ namespace ByodLauncher.Controllers
             return CreatedAtAction("GetTarget", new {id = target.Id}, _mapper.Map<TargetDto>(target));
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
         [HttpDelete("{id}")]
         public async Task<ActionResult<TargetDto>> DeleteTarget(Guid id)
         {
