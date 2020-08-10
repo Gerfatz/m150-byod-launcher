@@ -149,7 +149,6 @@ namespace ByodLauncher.Controllers
             var tempPath = Path.GetTempPath();
             var psFileName = Path.GetRandomFileName() + ".ps1";
             var psFilePathAndName = Path.Combine(tempPath, psFileName);
-            Console.WriteLine($"Powershell script: {psFilePathAndName}");
             await using (StreamWriter psFile = new StreamWriter(psFilePathAndName, false))
             {
                 psFile.WriteLine(script);
@@ -175,7 +174,6 @@ Function .onInstSuccess
 FunctionEnd
 ";
             var installerFilePathAndName = Path.Combine(tempPath, installerFileName) + ".nsi";
-            Console.WriteLine($"Installer: {installerFilePathAndName}");
             await using (StreamWriter installerFile = new StreamWriter(installerFilePathAndName, false))
             {
                 installerFile.WriteLine(installerScript);
@@ -183,7 +181,6 @@ FunctionEnd
             
             // use 'makensis' to actually generate the installer
             var command = $"makensis {installerFilePathAndName}";
-            Console.WriteLine($"Shell command: {command}");
 
             var contentType = "application/vnd.microsoft.portable-executable";
             return new PhysicalFileResult(Path.Combine(tempPath, installerFileName) + ".exe", contentType)
