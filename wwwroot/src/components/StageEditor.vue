@@ -10,6 +10,7 @@
                               counter="100"
                               placeholder="Titel der Stufe"
                               :rules="[rules.required, rules.length]"
+                              @keypress.enter="(event) => event.target.blur()"
                               @blur="onBlur"
                               @change="onChange"
                 />

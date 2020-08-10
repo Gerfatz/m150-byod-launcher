@@ -5,10 +5,11 @@
                 <v-text-field v-if="sessionTitleFieldHasFocus"
                               v-model="sessionTitle"
                               outlined
-                              placeholder="Titel für die neue Tour"
+                              placeholder="Titel für die geführte Einrichtung"
                               counter="100"
                               autofocus
                               :rules="[validationRules.required, validationRules.length]"
+                              @keypress.enter="(event) => event.target.blur()"
                               @blur="onBlur('sessionTitle')"
                               @change="updateSessionTitle"
                 />
@@ -29,11 +30,12 @@
                 <v-text-field v-if="directorNameFieldHasFocus"
                               ref="directorName"
                               v-model="directorName"
-                              label="Name des Tour-Guides"
+                              label="Name der Lehrperson"
                               counter="100"
                               :rules="[validationRules.required, validationRules.length]"
                               outlined
                               prepend-inner-icon="fa-user"
+                              @keypress.enter="(event) => event.target.blur()"
                               @blur="onBlur('directorName')"
                               @change="onDirectorChange"
                 />
@@ -51,11 +53,12 @@
                 <v-text-field v-if="directorEmailFieldHasFocus"
                               ref="directorEmail"
                               v-model="directorEmail"
-                              label="E-Mail Adresse des Tour-Guides"
+                              label="E-Mail Adresse der Lehrperson"
                               :rules="[validationRules.required]"
                               outlined
                               prepend-inner-icon="fa-envelope"
                               suffix="@gibz.ch"
+                              @keypress.enter="(event) => event.target.blur()"
                               @blur="onBlur('directorEmail')"
                               @change="onDirectorChange"
                 />

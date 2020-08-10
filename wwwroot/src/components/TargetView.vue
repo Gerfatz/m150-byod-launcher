@@ -5,13 +5,18 @@
         </v-card-title>
 
         <v-card-text>
+            <p class="body-1">{{target.description}}</p>
             <template v-if="isSimpleScriptTarget()">
-                <p>Dieser Schritt enthält ein Skript. Laden Sie das Skript herunter und führen Sie es anschliessend
-                    aus.</p>
+
+                <v-alert text border="left" icon="fa-exclamation">
+                    <p class="body-2">Verwenden Sie nur die von Ihnen heruntergeladene Datei und geben Sie diese
+                        keinesfalls weiter. Die Installationsdatei enthält spezifische und möglicherweise
+                        sensible Informationen, welche nur für die Ausführung durch Sie persönlich vorgesehen sind.</p>
+                </v-alert>
                 <v-row justify="space-around">
                     <v-btn @click="downloadScript(target.id)">
-                        <v-icon left>fa-cloud-download-alt</v-icon>
-                        Skript herunterladen
+                        <v-icon left small>fa-cloud-download-alt</v-icon>
+                        Installations-Datei herunterladen
                     </v-btn>
                 </v-row>
             </template>
