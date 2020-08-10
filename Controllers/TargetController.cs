@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -144,9 +145,51 @@ namespace ByodLauncher.Controllers
                 fileName.Replace(invalidChar, '_');
             }
 
-            var scriptContent = Encoding.ASCII.GetBytes(script);
-            var contentType = "APPLICATION/octet-stream";
-            return File(scriptContent, contentType, $"{fileName}.ps1");
+            // Write powershell script
+            var tempPath = Path.GetTempPath();
+            var psFileName = Path.GetRandomFileName() + ".ps1";
+            var psFilePathAndName = Path.Combine(tempPath, psFileName);
+            Console.WriteLine($"Powershell script: {psFilePathAndName}");
+            await using (StreamWriter psFile = new StreamWriter(psFilePathAndName, false))
+            {
+                psFile.WriteLine(script);
+            }
+
+            // Generate and write installer script
+            var installerFileName = Path.GetRandomFileName();
+            var installerScript = $@"
+!include x64.nsh
+
+RequestExecutionLevel admin
+OutFile ""{installerFileName}.exe""
+SilentInstall silent
+
+Section
+    SetOutPath $EXEDIR
+    File ""{psFilePathAndName}""
+ExecWait ""powershell -ExecutionPolicy Bypass -WindowStyle Hidden -File .\{psFileName}""
+SectionEnd
+
+Function .onInstSuccess
+    Delete ""{psFileName}""
+FunctionEnd
+";
+            var installerFilePathAndName = Path.Combine(tempPath, installerFileName) + ".nsi";
+            Console.WriteLine($"Installer: {installerFilePathAndName}");
+            await using (StreamWriter installerFile = new StreamWriter(installerFilePathAndName, false))
+            {
+                installerFile.WriteLine(installerScript);
+            }
+            
+            // use 'makensis' to actually generate the installer
+            var command = $"makensis {installerFilePathAndName}";
+            Console.WriteLine($"Shell command: {command}");
+
+            var contentType = "application/vnd.microsoft.portable-executable";
+            return new PhysicalFileResult(Path.Combine(tempPath, installerFileName) + ".exe", contentType)
+            {
+                FileDownloadName = $"{fileName}.exe"
+            };
         }
 
         private bool TargetExists(Guid id)
