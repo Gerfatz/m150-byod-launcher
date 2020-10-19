@@ -21,6 +21,9 @@
 **/.idea/**/contentModel.xml
 **/.idea/**/modules.xml
 
+# All .idea files
+.idea/.idea.ByodLauncher.dir
+
 *.suo
 *.user
 .vs/
