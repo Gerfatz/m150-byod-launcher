@@ -23,9 +23,10 @@
             </v-card-text>
 
             <v-card-text>
-                <v-list two-line flat>
+                <v-list flat>
                     <v-list-item-group v-model="selectedTargets" multiple>
-                        <v-list-item v-for="target in availableStageTargetsForStage(stage.id)"
+                        <v-list-item three-line
+                                     v-for="target in availableStageTargetsForStage(stage.id)"
                                      :key="target.id"
                                      :value="target.id">
                             <template v-slot:default="{active, toggle}">
@@ -112,7 +113,7 @@
 
         confirm() {
             const stage = this.stage;
-            const promises: Promise<any>[] = [];
+            const promises: Promise<void>[] = [];
             this.selectedTargets.forEach(targetId => {
                 const stageTarget = new StageTarget({stageId: stage.id, targetId});
                 promises.push(this.$store.dispatch(stageTargetIdentifiers.actions.add, stageTarget));

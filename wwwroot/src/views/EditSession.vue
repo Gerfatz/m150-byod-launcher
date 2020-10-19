@@ -45,6 +45,7 @@
                     <v-col cols="12">
                         <session-form :default-director-fields-focus="false"
                                       @start-session="startSession"
+                                      :focus-field-on-load="false"
                         />
                     </v-col>
                 </v-row>
@@ -55,7 +56,9 @@
                     >
                         <stage-editor v-for="stage of sortedStages"
                                       :key="stage.id"
-                                      :stage="stage"/>
+                                      :stage="stage"
+                                      :focus-title-field-on-load="false"
+                        />
                     </v-col>
 
                     <v-col v-if="session.id"
@@ -102,6 +105,16 @@
 
         get session() {
             return this.$store.state.session.session;
+        }
+
+        created() {
+            window.addEventListener('beforeunload', this.preventTabClose);
+        }
+
+        preventTabClose(event: BeforeUnloadEvent) {
+            event.preventDefault();
+            event.returnValue = "";
+            return "";
         }
 
         showEditForm = false;

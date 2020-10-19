@@ -28,8 +28,6 @@ export default function createSignalRPlugin() {
         });
 
         client.on('JoinSession', (sessionId: Id, participantId: Id, displayName: string) => {
-            console.log('id', participantId);
-            console.log('displayName', displayName);
             store.dispatch(attendSessionIdentifiers.actions.setParticipantId, participantId)
                 .then(() => {
                     return store.dispatch(attendSessionIdentifiers.actions.setDisplayName, displayName);

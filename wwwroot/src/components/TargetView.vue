@@ -14,9 +14,11 @@
                         sensible Informationen, welche nur für die Ausführung durch Sie persönlich vorgesehen sind.</p>
                 </v-alert>
                 <v-row justify="space-around">
-                    <v-btn @click="downloadScript(target.id)">
+                    <v-btn @click="downloadInstaller(target.id)"
+                           :loading="isLoading"
+                    >
                         <v-icon left small>fa-cloud-download-alt</v-icon>
-                        Installations-Datei herunterladen
+                        Installationsdatei herunterladen
                     </v-btn>
                 </v-row>
             </template>
@@ -38,10 +40,14 @@
     import TutorialTargetView from "@/components/TutorialTargetView.vue";
     import {targetApi} from "@/api/targetApi";
     import {mapGetters} from "vuex";
+    import {rootIdentifiers} from "@/store/identifiers";
 
     @Component({
         components: {TutorialTargetView},
         computed: {
+            ...mapGetters({
+                isLoading: 'isLoading',
+            }),
             ...mapGetters('tutorialStep', {
                 tutorialStepsForTarget: 'tutorialStepsForTarget',
             })
@@ -58,8 +64,11 @@
             return Object.prototype.hasOwnProperty.call(this.target, 'stepIds')
         }
 
-        public downloadScript(targetId: Id) {
-            targetApi.downloadScript(targetId);
+        public downloadInstaller(targetId: Id) {
+            this.$store.dispatch(rootIdentifiers.actions.startLoading);
+            targetApi.downloadInstaller(targetId).then(() => {
+                this.$store.dispatch(rootIdentifiers.actions.finishLoading);
+            });
         }
 
     }

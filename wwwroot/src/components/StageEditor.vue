@@ -108,6 +108,8 @@
     )
     export default class StageEditor extends Vue {
         @Prop() stage!: Stage;
+        @Prop({ default: true }) readonly focusTitleFieldOnLoad!: boolean;
+
 
         get stageIdentifiers() {
             return stageIdentifiers
@@ -121,7 +123,7 @@
             this.$store.dispatch(stageIdentifiers.actions.update, {id: this.stage.id, title});
         }
 
-        titleFieldHasFocus = true;
+        titleFieldHasFocus = this.focusTitleFieldOnLoad;
 
         rules = {
             required: (value: string) => !!value || 'Feld darf nicht leer sein',

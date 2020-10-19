@@ -3,11 +3,22 @@
         <v-row>
             <v-col cols="12">
                 <h1 class="display-2 mb-3">{{session.title}}</h1>
-                <p class="body-1">An der geführten Einrichtung mit dem Titel <span class="font-weight-bold">{{session.title}}</span>
-                    nehmen aktuell <span
-                            class="font-weight-bold">{{Object.entries(participants).length}} Personen</span> teil.</p>
-                <p>Sie können mit dem Code <span class="font-weight-bold">{{formattedAccessCode}}</span> an dieser
-                    geführten Einrichtung teilnehmen.</p>
+
+                <v-alert text
+                         border="left"
+                         icon="fa-exclamation"
+                >
+                    <p class="body-1 mb-0">
+                        Sie können mit dem Code <span class="font-weight-bold">{{formattedAccessCode}}</span> an dieser
+                        geführten Einrichtung teilnehmen.</p>
+                </v-alert>
+
+                <p v-if="Object.entries(participants).length > 0"
+                   class="body-1 mt-10 mb-0"
+                >
+                    Aktuell Teilnehmende an dieser geführten Einrichtung:
+                </p>
+
                 <div>
                     <v-chip v-for="[participantId, displayName] in Object.entries(participants)"
                             :key="participantId"
@@ -51,7 +62,13 @@
 
         <v-row v-show="stageNumber === 0">
             <v-col cols="12" class="text-center">
-                <v-btn @click="startSession">Start session</v-btn>
+                <v-btn large
+                       color="primary"
+                       @click="startSession"
+                >
+                    <v-icon left small>fa-play</v-icon>
+                    Geführte Einrichtung starten
+                </v-btn>
             </v-col>
         </v-row>
     </v-container>

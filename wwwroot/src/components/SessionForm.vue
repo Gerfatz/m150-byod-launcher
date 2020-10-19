@@ -1,5 +1,8 @@
 <template>
-    <v-form v-model="syncFormIsValid" ref="baseForm" @submit.prevent="noSubmit">
+    <v-form v-model="syncFormIsValid"
+            ref="baseForm"
+            @submit.prevent="submit"
+    >
         <v-row>
             <v-col cols="12">
                 <v-text-field v-if="sessionTitleFieldHasFocus"
@@ -9,7 +12,7 @@
                               counter="100"
                               autofocus
                               :rules="[validationRules.required, validationRules.length]"
-                              @keypress.enter="(event) => event.target.blur()"
+                              @keydown.enter="submit"
                               @blur="onBlur('sessionTitle')"
                               @change="updateSessionTitle"
                 />
@@ -35,7 +38,7 @@
                               :rules="[validationRules.required, validationRules.length]"
                               outlined
                               prepend-inner-icon="fa-user"
-                              @keypress.enter="(event) => event.target.blur()"
+                              @keydown.enter="submit"
                               @blur="onBlur('directorName')"
                               @change="onDirectorChange"
                 />
@@ -58,7 +61,7 @@
                               outlined
                               prepend-inner-icon="fa-envelope"
                               suffix="@gibz.ch"
-                              @keypress.enter="(event) => event.target.blur()"
+                              @keydown.enter="submit"
                               @blur="onBlur('directorEmail')"
                               @change="onDirectorChange"
                 />
@@ -97,7 +100,7 @@
                        @click="$emit('start-session')"
                        :loading="isLoading"
                 >
-                    <v-icon left>fa-play</v-icon>
+                    <v-icon left small>fa-play</v-icon>
                     Einrichtung starten
                 </v-btn>
             </v-col>
@@ -133,11 +136,13 @@
     export default class SessionForm extends Vue {
         @PropSync('formIsValid', {type: Boolean}) syncFormIsValid!: boolean;
         @Prop({default: true}) readonly defaultDirectorFieldsFocus!: boolean;
+        @Prop({ default: true }) readonly focusFieldOnLoad!: boolean;
+
 
         directorEmailSuffix = '@gibz.ch';
         formIsValid = false;
 
-        sessionTitleFieldHasFocus = true;
+        sessionTitleFieldHasFocus = this.focusFieldOnLoad;
         directorNameFieldHasFocus = this.defaultDirectorFieldsFocus;
         directorEmailFieldHasFocus = this.defaultDirectorFieldsFocus;
 
@@ -213,8 +218,13 @@
             return code.toString().substr(0, 3) + '-' + code.toString().substr(3, 3)
         }
 
-        noSubmit() {
-            // prevent form submission
+        submit() {
+            if ((this.$refs['baseForm'] as HTMLFormElement).validate()) {
+                this.sessionTitleFieldHasFocus = false;
+                this.directorNameFieldHasFocus = false;
+                this.directorEmailFieldHasFocus = false;
+                this.$emit('submit-session-form');
+            }
         }
 
     }

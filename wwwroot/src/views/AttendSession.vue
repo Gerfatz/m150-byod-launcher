@@ -1,6 +1,7 @@
 <template>
     <div>
 
+        <!-- TODO: Beim Page-Reload sollte nach Möglichkeit die gleiche Session automatisch wieder gestartet werden -->
         <div v-show="stages.length <= 0">LOADING...</div>
 
         <div v-show="stages.length > 0">
@@ -58,6 +59,16 @@
     })
     export default class AttendSession extends Vue {
         targetResultToggleButton = NaN;
+
+        created() {
+            window.addEventListener('beforeunload', this.preventTabClose);
+        }
+
+        preventTabClose(event: BeforeUnloadEvent) {
+            event.preventDefault();
+            event.returnValue = "";
+            return "";
+        }
 
         sendTargetResult(targetId: Id, success: boolean) {
             this.$store.dispatch(attendSessionIdentifiers.actions.sendTargetResult, {targetId, success});

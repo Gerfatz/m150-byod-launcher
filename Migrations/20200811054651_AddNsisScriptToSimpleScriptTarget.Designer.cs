@@ -3,14 +3,16 @@ using System;
 using ByodLauncher.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ByodLauncher.Migrations
 {
     [DbContext(typeof(ByodLauncherContext))]
-    partial class ByodLauncherContextModelSnapshot : ModelSnapshot
+    [Migration("20200811054651_AddNsisScriptToSimpleScriptTarget")]
+    partial class AddNsisScriptToSimpleScriptTarget
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

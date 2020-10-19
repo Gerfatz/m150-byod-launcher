@@ -16,6 +16,7 @@
 
         <session-form :form-is-valid.sync="formIsValid"
                       @start-session="startSession"
+                      @submit-session-form="createDirectorAndSession"
         />
 
         <v-row v-if="session.id === null">
@@ -53,12 +54,12 @@
     </v-container>
 </template>
 
-<script>
+<script lang="ts">
     import Vue from 'vue'
-    import {mapGetters, mapState} from "vuex";
+    import {mapGetters} from "vuex";
     import Component from 'vue-class-component'
-    import StageEditor from "@/components/StageEditor";
-    import SessionForm from "@/components/SessionForm";
+    import StageEditor from "@/components/StageEditor.vue";
+    import SessionForm from "@/components/SessionForm.vue";
     import {directorIdentifiers} from "@/store/newModules/director";
     import {sessionIdentifiers} from "@/store/newModules/session";
     import {targetIdentifiers} from "@/store/newModules/target";
@@ -71,9 +72,6 @@
             ...mapGetters({
                 isLoading: 'isLoading',
             }),
-            ...mapState('session', {
-                session: 'session'
-            }),
             ...mapGetters('stage', {
                 sortedStages: 'sortedStages',
             }),
@@ -82,6 +80,20 @@
     export default class NewSession extends Vue {
 
         formIsValid = false;
+
+        get session() {
+            return this.$store.state.session.session;
+        }
+        
+        created() {
+            window.addEventListener('beforeunload', this.preventTabClose);
+        }
+
+        preventTabClose(event: BeforeUnloadEvent) {
+            event.preventDefault();
+            event.returnValue = "";
+            return "";
+        }
 
         createDirectorAndSession() {
             if (this.formIsValid) {

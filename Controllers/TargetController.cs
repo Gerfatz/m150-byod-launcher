@@ -9,9 +9,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ByodLauncher.Models;
 using ByodLauncher.Models.Dto;
+using ByodLauncher.Utilities;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+
 
 namespace ByodLauncher.Controllers
 {
@@ -21,11 +24,13 @@ namespace ByodLauncher.Controllers
     {
         private readonly IMapper _mapper;
         private readonly ByodLauncherContext _context;
+        private readonly IConfiguration _configuration;
 
-        public TargetController(ByodLauncherContext context, IMapper mapper)
+        public TargetController(ByodLauncherContext context, IMapper mapper, IConfiguration configuration)
         {
             _context = context;
             _mapper = mapper;
+            _configuration = configuration;
         }
 
         // GET: api/Target
@@ -118,10 +123,15 @@ namespace ByodLauncher.Controllers
             return _mapper.Map<TargetDto>(target);
         }
 
-        [HttpGet("{id}/script")]
-        public async Task<IActionResult> DownloadScript(Guid id)
+        [HttpGet("{id}/installer")]
+        public async Task<IActionResult> DownloadInstaller(Guid id)
         {
-            var target = await _context.SimpleScriptTargets.FindAsync(id);
+            var target = await _context.SimpleScriptTargets
+                .Include(target => target.StageTargets)
+                .ThenInclude(stageTarget => stageTarget.Stage)
+                .ThenInclude(stage => stage.Session)
+                .SingleOrDefaultAsync(target => target.Id == id);
+
             if (target == null)
             {
                 return NotFound();
@@ -130,6 +140,7 @@ namespace ByodLauncher.Controllers
             var script = target.Script
                 .Replace("PARTICIPANT_ID", HttpContext.Session.GetString("participantId"))
                 .Replace("TARGET_ID", target.Id.ToString())
+                .Replace("SESSION_ID", target.StageTargets.First().Stage.Session.Id.ToString())
                 .Replace("RESPONSE_URL", GetResponseUrl());
 
             if (target.RequiresCredentials)
@@ -140,7 +151,7 @@ namespace ByodLauncher.Controllers
             }
 
             var fileName = new StringBuilder(target.Title);
-            foreach (var invalidChar in System.IO.Path.GetInvalidFileNameChars())
+            foreach (var invalidChar in Path.GetInvalidFileNameChars())
             {
                 fileName.Replace(invalidChar, '_');
             }
@@ -155,35 +166,30 @@ namespace ByodLauncher.Controllers
             }
 
             // Generate and write installer script
+            var staticFilesPath = _configuration["FileUpload:FilesystemAbsolutePath"];
+            var installerResourcesDirectory = _configuration["FileUpload:InstallerResourcesDirectoryName"];
+            var installerResourcesPath = $"{staticFilesPath}/{installerResourcesDirectory}";
+
             var installerFileName = Path.GetRandomFileName();
-            var installerScript = $@"
-!include x64.nsh
+            var installerFilePathAndName = Path.Combine(tempPath, installerFileName);
+            var installerScript = target.NsisScript
+                .Replace("INSTALLER_PATH", tempPath)
+                .Replace("INSTALLER_FILENAME", installerFileName)
+                .Replace("SCRIPT_PATH", tempPath)
+                .Replace("SCRIPT_FILENAME", psFileName)
+                .Replace("INSTALLER_RESOURCES_PATH", installerResourcesPath);
 
-RequestExecutionLevel admin
-OutFile ""{installerFileName}.exe""
-SilentInstall silent
-
-Section
-    SetOutPath $EXEDIR
-    File ""{psFilePathAndName}""
-ExecWait ""powershell -ExecutionPolicy Bypass -WindowStyle Hidden -File .\{psFileName}""
-SectionEnd
-
-Function .onInstSuccess
-    Delete ""{psFileName}""
-FunctionEnd
-";
-            var installerFilePathAndName = Path.Combine(tempPath, installerFileName) + ".nsi";
-            await using (StreamWriter installerFile = new StreamWriter(installerFilePathAndName, false))
+            await using (StreamWriter installerFile = new StreamWriter(installerFilePathAndName + ".nsi", false))
             {
                 installerFile.WriteLine(installerScript);
             }
-            
+
             // use 'makensis' to actually generate the installer
-            var command = $"makensis {installerFilePathAndName}";
+            var command = $"makensis {installerFilePathAndName}.nsi";
+            command.Bash();
 
             var contentType = "application/vnd.microsoft.portable-executable";
-            return new PhysicalFileResult(Path.Combine(tempPath, installerFileName) + ".exe", contentType)
+            return new PhysicalFileResult(installerFilePathAndName + ".exe", contentType)
             {
                 FileDownloadName = $"{fileName}.exe"
             };

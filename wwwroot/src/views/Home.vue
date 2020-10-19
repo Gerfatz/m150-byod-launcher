@@ -50,13 +50,14 @@
                     <h3 class="display-1 mt-5 primary--text">Teilnahme an geführter Einrichtung</h3>
                 </v-card-title>
                 <v-card-text>
-                    <v-form ref="personalDataForm" v-model="validPersonalData"
-                            @keyup.native.enter="submitPersonalDataForm">
+                    <v-form ref="personalDataForm"
+                            v-model="validPersonalData"
+                            @submit.prevent="submitPersonalDataForm"
+                    >
                         <v-row>
                             <v-col cols="12">
                                 <p class="body-2">Sie sind auf gutem Weg! Geben Sie Ihren Namen ins untenstehende Feld
-                                    ein,
-                                    damit Ihr Fortschritt während der geführten Einrichtung erkennbar ist.
+                                    ein, damit Ihr Fortschritt während der geführten Einrichtung erkennbar ist.
                                 </p>
                                 <v-text-field ref="displayNameField"
                                               v-model="displayName"
@@ -340,7 +341,7 @@
                 font-weight: normal;
             }
         }
-        
+
         .v-messages__message {
             text-align: center;
         }

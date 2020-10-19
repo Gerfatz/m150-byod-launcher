@@ -44,16 +44,19 @@ class TargetApi extends Api {
             });
     }
 
-    public downloadScript(targetId: Id) {
-        axios({
+    public downloadInstaller(targetId: Id) {
+        return axios({
             url: downloadScriptUriPattern.replace(downloadScriptTargetIdPlaceholder, targetId as string),
             method: "GET",
             responseType: "blob"
         }).then((response) => {
             const fileUrl = window.URL.createObjectURL(new Blob([response.data]));
             const fileLink = document.createElement('a');
+            const disposition = response.headers['content-disposition'];
+            const filename = decodeURI(disposition.match(/filename="(.*)"/)[1]);
+            
             fileLink.href = fileUrl;
-            fileLink.setAttribute('download', 'theScript.ps1');
+            fileLink.setAttribute('download', filename);
             document.body.appendChild(fileLink);
             fileLink.click();
         });
