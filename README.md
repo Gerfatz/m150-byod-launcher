@@ -21,6 +21,8 @@ When the user visits the BYOD Launcher application using _www_ in the domain nam
 ### Edit-Code for Sessions Publicly Available
 When inspecting certain api responses, regular users of the application ("students" / participants) receive the six-digit code for editing a prepared session. This edit-code should be kept secret since it allows (mis)configuration of existing sessions.
 
+_Thanks to Noah E. for pointing out this security issue!_
+
 ## Known Limitations
 In this sections, known restrictions and limitations in the currently live running application are listed. This items might be a good starting point for further optimizations and developments ;-)
 
