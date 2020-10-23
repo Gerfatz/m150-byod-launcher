@@ -12,6 +12,15 @@ The live BYOD Launcher application is running on a virtual machine in [Google Cl
 
 TLS certificates for HTTPS connections are retrieved from [Let's encrypt](https://letsencrypt.org) using [certbot](https://certbot.eff.org/).
 
+## Known Bugs and Security Issues
+In thi section, known bugs ans security issues in the currently live running application are listed.
+
+### Failing API Requests
+When the user visits the BYOD Launcher application using _www_ in the domain name (https://**www**.byod-launcher.ch), certain api requests are failing due to a restriction in Content Security Policy (CSP).
+
+### Edit-Code for Sessions Publicly Available
+When inspecting certain api responses, regular users of the application ("students" / participants) receive the six-digit code for editing a prepared session. This edit-code should be kept secret since it allows (mis)configuration of existing sessions.
+
 ## Known Limitations
 In this sections, known restrictions and limitations in the currently live running application are listed. This items might be a good starting point for further optimizations and developments ;-)
 
