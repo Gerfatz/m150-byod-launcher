@@ -37,6 +37,9 @@ It would be much easier for teachers, if they could use a kind of authentication
 ### Presentation of Tutorial Steps
 The presentation of tutorials should be improved - especially when images are used within tutorial steps. Sometimes, bigger tutorials seem to overlap the viewport which results in inaccessible buttons.
 
+### Editing of Tutorials
+Tutorials or individual tutorial steps cannot be edited after they have been created.
+
 ### More Detailed Results in Sessions
 When teachers conduct BYOD setup sessions with their classes, there are multiple mechanisms for feedback of completed steps. This feedback is either returned automatically or manually and results in simple red/green status bars in the presenters view.
 
