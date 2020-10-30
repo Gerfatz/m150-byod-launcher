@@ -4,13 +4,18 @@ BYOD Launcher is a tool used at _Gewerblich-industrielles Bildungszentrum Zug (G
 It's an application developed and used internally at GIBZ although it's publicly available at https://byod-launcher.ch.
 
 ## Tech Stack
-At it's core, BYOD Launcher is a ASP.NET Core web application. The frontend is built using the progressive javascript framework [Vue.js](https://vuejs.org) and the material design framework [Vuetify](https://vuetifyjs.com).
+At it's core, BYOD Launcher is a ASP.NET Core web application. The frontend is built using the progressive javascript framework [Vue.js](https://vuejs.org) and the material design framework [Vuetify](https://vuetifyjs.com). Additionally, [Vuex](https://vuex.vuejs.org/) is used for state management and [Vue Router](https://router.vuejs.org/) for routing in the frontend.  
 
 Communication between frontend and backend depends on a REST api implemented in ASP.NET Core as well as [ASP.NET Core SignalR](https://docs.microsoft.com/en-us/aspnet/core/signalr/introduction?view=aspnetcore-3.1).
 
 The live BYOD Launcher application is running on a virtual machine in [Google Cloud Compute](https://cloud.google.com/compute?hl=de). This machine is running a [Debian 10 (Buster)](https://www.debian.org/News/2019/20190706) operating system. The applications data is kept in a [MariaDB](https://mariadb.org/) database. [Nginx](https://www.nginx.com/) is used as a reverse proxy, redirecting incoming traffic on ports 80 (http) and 443 (https) to the port 5000 where the ASP.NET Core application is running.
 
 TLS certificates for HTTPS connections are retrieved from [Let's encrypt](https://letsencrypt.org) using [certbot](https://certbot.eff.org/).
+
+## Installation
+You'll find an installation guide in the [INSTALL.md](INSTALL.md) file.
+
+This installation guide is intended for local development installations only and should _not_ be used for production environments. Also, the guide is not complete and needs some degree of technical curiosity.
 
 ## Known Bugs and Security Issues
 In thi section, known bugs ans security issues in the currently live running application are listed.
