@@ -97,7 +97,14 @@ namespace ByodLauncher
                 options.AddPolicy(LocalhostCorsPolicy,
                     builder =>
                     {
-                        builder.AllowAnyOrigin()
+                        builder.WithOrigins(
+                                "https://localhost:5001",
+                                "http://localhost:5000",
+                                "https://localhost:44369",
+                                "http://localhost:43847",
+                                "https://byodlauncher.ch",
+                                "https://www.byodlauncher.ch"
+                            )
                             .AllowAnyHeader()
                             .AllowAnyMethod()
                             .AllowCredentials();
