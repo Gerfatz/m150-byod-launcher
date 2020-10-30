@@ -123,3 +123,12 @@ Since the backend is just a plain ASP.NET Core application, you finally might wa
 # Run the backend using the dotnet commandline tool
 dotnet run --launch-profile ByodLauncher
 ```
+
+### Verify Running Application
+Depending on the way to start the backend, your local application runs on different ports. For HTTPS connections, this may be ports `5001` or `44369`. For unsecured HTTP connections, this may be ports `5000` or `43847`.
+
+For the frontend, there's a configuration item named `VUE_APP_API_HOST` in the file [wwwroot/.env.development](wwwroot/.env.development). The default value in this configuration file is set to `http://localhost:5000`.
+
+Since the application is configured to accept network requests only from the same origin, the ports of this configuration item and the running application must match. You can either update the configuration in [wwwroot/.enf.development](wwwroot/.env.development) or the ports in [Properties/launchSettings.json](Properties/launchSettings.json).
+
+To finally verify, that everything works as expected, you can point your browser to the path `/edit-session` and enter a valid edit code (e.g. [https://localhost:5001/edit-session](https://localhost:5001/edit-session), where you might need to adjust the port number). Have a look at the database for retrieving such an edit code. One example from the _sampleData_ is: `549-496`.
