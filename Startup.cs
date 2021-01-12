@@ -50,37 +50,67 @@ namespace ByodLauncher
                 options.Cookie.SameSite = SameSiteMode.Strict;
             });
 
-            services.AddAuthentication(options =>
-                {
-                    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                })
-                .AddCookie(options =>
-                {
-                    options.Cookie.HttpOnly = true;
-                    options.Cookie.IsEssential = true;
-                    options.Cookie.Name = "ByodLauncherAuth";
-                    options.Cookie.SameSite = SameSiteMode.Strict;
-                    options.LoginPath = "/Login";
+            services.AddAuthentication().AddMicrosoftAccount(microsoftOptions =>
+            {
+                microsoftOptions.ClientId = Configuration["Authentication:Microsoft:ClientId"];
+                microsoftOptions.ClientSecret = Configuration["Authentication:Microsoft:ClientSecret"];
+            })
+            .AddCookie(options =>
+            {
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+                options.Cookie.Name = "ByodLauncherAuth";
+                options.Cookie.SameSite = SameSiteMode.Strict;
+                options.LoginPath = "/Login";
 
-                    options.Events.OnRedirectToAccessDenied =
-                        options.Events.OnRedirectToLogin = ctx =>
+                options.Events.OnRedirectToAccessDenied =
+                    options.Events.OnRedirectToLogin = ctx =>
+                    {
+                        if (ctx.Request.Path.StartsWithSegments("/api") &&
+                            ctx.Response.StatusCode == StatusCodes.Status200OK)
                         {
-                            if (ctx.Request.Path.StartsWithSegments("/api") &&
-                                ctx.Response.StatusCode == StatusCodes.Status200OK)
-                            {
-                                ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                            }
-                            else
-                            {
-                                ctx.Response.Redirect(ctx.RedirectUri);
-                            }
+                            ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        }
+                        else
+                        {
+                            ctx.Response.Redirect(ctx.RedirectUri);
+                        }
 
-                            return Task.CompletedTask;
-                        };
-                });
+                        return Task.CompletedTask;
+                    };
+            });
+
+            // services.AddAuthentication(options =>
+            //     {
+            //         options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            //         options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            //         options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            //         options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            //     })
+            //     .AddCookie(options =>
+            //     {
+            //         options.Cookie.HttpOnly = true;
+            //         options.Cookie.IsEssential = true;
+            //         options.Cookie.Name = "ByodLauncherAuth";
+            //         options.Cookie.SameSite = SameSiteMode.Strict;
+            //         options.LoginPath = "/Login";
+
+            //         options.Events.OnRedirectToAccessDenied =
+            //             options.Events.OnRedirectToLogin = ctx =>
+            //             {
+            //                 if (ctx.Request.Path.StartsWithSegments("/api") &&
+            //                     ctx.Response.StatusCode == StatusCodes.Status200OK)
+            //                 {
+            //                     ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            //                 }
+            //                 else
+            //                 {
+            //                     ctx.Response.Redirect(ctx.RedirectUri);
+            //                 }
+
+            //                 return Task.CompletedTask;
+            //             };
+            //     });
 
             var connectionString = Configuration.GetConnectionString("MariaDb");
             services.AddDbContext<ByodLauncherContext>(options => options
@@ -177,6 +207,7 @@ namespace ByodLauncher
             });
 
             app.UseRouting();
+            app.UseAuthentication();
             app.UseAuthorization();
             app.UseSession();
 

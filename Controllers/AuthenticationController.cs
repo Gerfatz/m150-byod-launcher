@@ -38,7 +38,7 @@ namespace ByodLauncher.Controllers
                 return BadRequest();
             }
 
-            return Ok();
+            return Ok("Test");
         }
     }
 }
