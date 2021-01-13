@@ -9,9 +9,11 @@
                          :key="step.id"
         >
             <p class="title">{{step.title}}</p>
+            <div class="content-div">
             <div v-html="step.instruction"
-                 class="ck-content"
+                 class="ck-content image-fit"
             />
+            </div>
             <v-divider light/>
             <v-row class="controls"
                    align="center"
@@ -70,3 +72,16 @@
     }
 
 </script>
+
+<style scoped>
+    .content-div {
+        height: 550px;
+        width: 100%;
+    }
+
+    .image-fit{
+        height: 100%;
+        width: 100%;
+        object-fit: contain;
+    }
+</style>
