@@ -17,6 +17,7 @@ export const attendSessionIdentifiers = {
         setDisplayName: modulePrefix + 'SET_DISPLAY_NAME',
         updateStageNumber: modulePrefix + 'UPDATE_STAGE_NUMBER',
         sendTargetResult: modulePrefix + 'SEND_TARGET_RESULT',
+        sendHelpRequest: modulePrefix + "SEND_HELP_REQUEST"
     },
     mutations: {
         setParticipantId: modulePrefix + 'SET_PARTICIPANT_ID',
@@ -32,13 +33,15 @@ export interface AttendSessionState {
     displayName: string;
     stageNumber: number;
     targetResults: ParticipantTargetResults;
+    helpRequested: boolean;
 }
 
 const state = {
     participantId: null,
     displayName: '',
     stageNumber: 0,
-    targetResults: {} as ParticipantTargetResults
+    targetResults: {} as ParticipantTargetResults,
+    helpRequested: false
 } as AttendSessionState;
 
 const getters = {
@@ -95,6 +98,11 @@ const actions = {
                     dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
                 });
         }
+    },
+
+    SEND_HELP_REQUEST({state, commit})
+    {
+        
     }
 } as ActionTree<AttendSessionState, any>;
 

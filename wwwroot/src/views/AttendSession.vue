@@ -28,6 +28,7 @@
                             >
                                 Ausführung fehlgeschlagen
                             </v-btn>
+                            <v-btn @click="sendHelpRequest()" small outlined color="secondary">
                         </v-btn-toggle>
                     </v-row>
                 </template>
@@ -72,6 +73,10 @@
 
         sendTargetResult(targetId: Id, success: boolean) {
             this.$store.dispatch(attendSessionIdentifiers.actions.sendTargetResult, {targetId, success});
+        }
+
+        sendHelpRequest(){
+            this.$store.dispatch()
         }
     }
 </script>
