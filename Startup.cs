@@ -184,7 +184,7 @@ namespace ByodLauncher
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<SessionHub>("sessionHub");
+                endpoints.MapHub<SessionHub>("/sessionHub");
             });
 
             app.UseFileServer(new FileServerOptions
