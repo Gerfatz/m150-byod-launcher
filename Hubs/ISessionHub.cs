@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using ByodLauncher.Models;
 
@@ -13,5 +14,6 @@ namespace ByodLauncher.Hubs
         Task ReceiveTargetResult(Guid targetId, Guid participantId, bool success, string details);
         Task RemoveTargetResult(Guid targetId, Guid participantId);
         Task UpdateStageNumber(int stageNumber);
+        Task UpdateParticipantsThatNeedHelp(IEnumerable<string> names);
     }
 }

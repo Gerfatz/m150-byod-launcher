@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using ByodLauncher.Models;
@@ -122,6 +124,32 @@ namespace ByodLauncher.Hubs
             await Clients.Caller.JoinSession(participant.SessionId, participant.Id, participant.DisplayName);
 
             //await SendCurrentStageNumber(participant.Session);
+        }
+
+        public async Task RequestHelpAsParticipant(Guid participantId)
+        {
+            Participant participant = await _context.Participants
+                .Include(p => p.Session)
+                    .ThenInclude(session => session.Director)
+                .Include(p => p.Session)
+                    .ThenInclude(p => p.Participants)
+                .SingleOrDefaultAsync(p => p.Id == participantId);
+
+            participant.NeedsHelp = !participant.NeedsHelp;
+            await _context.SaveChangesAsync();
+
+            await SendParticipantsThatNeedHelp(participant.Session);         
+        }
+
+        private async Task SendParticipantsThatNeedHelp(Session session)
+        {
+            List<string> names = session.Participants
+                .Where(p => p.NeedsHelp)
+                .Select(p => p.DisplayName)
+                .ToList();
+
+            await Clients.Client(session.Director.ConnectionId)
+                .UpdateParticipantsThatNeedHelp(names);
         }
 
         private async Task SendCurrentStageNumber(Session session)

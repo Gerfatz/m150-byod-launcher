@@ -100,6 +100,7 @@ namespace ByodLauncher
                         builder.WithOrigins(
                                 "https://localhost:5001",
                                 "http://localhost:5000",
+                                "http://localhost:8080",
                                 "https://localhost:44369",
                                 "http://localhost:43847",
                                 "https://byodlauncher.ch",
