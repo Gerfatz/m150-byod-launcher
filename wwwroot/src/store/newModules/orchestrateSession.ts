@@ -34,7 +34,7 @@ export interface OrchestrateSessionState {
     participants: { [key: string]: string };
     targetResults: TargetResultCollection;
     stageNumber: number;
-    participantsThatNeeedHelp: string[];
+    participantsThatNeedHelp: string[];
 }
 
 const state = {

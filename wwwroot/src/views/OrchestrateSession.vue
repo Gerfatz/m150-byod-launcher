@@ -50,6 +50,7 @@
                                 Zur nächsten Stufe
                                 <v-icon right>fa-caret-down</v-icon>
                             </v-btn>
+                            <p>{{$store.orchestrateSession.participantsThatNeedHelp}}</p>
                         </v-row>
                     </template>
 
