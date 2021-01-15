@@ -18,6 +18,16 @@ class ParticipantApi extends Api {
                 throw error;
             })
     }
+
+    public sendHelpRequest(sessionId: Id, participantId: Id){
+        return this.post(`session/${sessionId}/participant/requestHelp/${participantId}`, JSON.stringify({participantId}))
+            .then((response: AxiosResponse) => {
+                return response.data;
+            })
+            .catch((error: AxiosError) => {
+                throw error;
+            })
+    }
 }
 
 export const participantApi = new ParticipantApi({});

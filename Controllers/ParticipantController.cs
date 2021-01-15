@@ -1,10 +1,14 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using ByodLauncher.Hubs;
 using ByodLauncher.Models;
 using ByodLauncher.Models.Dto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace ByodLauncher.Controllers
@@ -15,12 +19,14 @@ namespace ByodLauncher.Controllers
     {
         private readonly ByodLauncherContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IHubContext<SessionHub, ISessionHub> _sessionHub;
 
 
-        public ParticipantController(ByodLauncherContext context, IConfiguration configuration)
+        public ParticipantController(ByodLauncherContext context, IConfiguration configuration, IHubContext<SessionHub, ISessionHub> sessionHub)
         {
             _context = context;
             _configuration = configuration;
+            _sessionHub = sessionHub;
         }
 
         [HttpPost]
@@ -49,6 +55,32 @@ namespace ByodLauncher.Controllers
             }
 
             return Redirect(participantId);
+        }
+
+        [HttpPost]
+        [Route("requestHelp/{participantId}")]
+        public async Task<IActionResult> RequestHelp(Guid sessionId, Guid participantId)
+        {
+            Participant participant = await _context.Participants
+                .Include(p => p.Session)
+                    .ThenInclude(session => session.Director)
+                .Include(p => p.Session)
+                    .ThenInclude(p => p.Participants)
+                .SingleOrDefaultAsync(p => p.Id == participantId);
+
+            if(participant == null)
+            {
+                return NotFound();
+            }
+
+            participant.NeedsHelp = !participant.NeedsHelp;
+            await _context.SaveChangesAsync();
+
+            await _sessionHub.Clients
+                .Client(participant.Session.Director.ConnectionId)
+                .UpdateParticipantsThatNeedHelp(participant.Session.Participants.Where(p => p.NeedsHelp).Select(p => p.DisplayName));
+
+            return Ok();
         }
 
         private RedirectResult Redirect(Guid participantId)

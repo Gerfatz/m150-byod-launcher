@@ -27,6 +27,21 @@
                         {{displayName}}
                     </v-chip>
                 </div>
+
+                <p v-if="participantsThatNeedHelp.length > 0"
+                   class="body-1 mt-10 mb-0"
+                >
+                    Teilnehmer welche Hilfe benötigen:
+                </p>
+
+                <div>
+                    <v-chip v-for="(participant, index) in participantsThatNeedHelp"
+                            :key="index"
+                            class="ma-2"
+                    >
+                        {{participant}}
+                    </v-chip>
+                </div>
             </v-col>
         </v-row>
         <v-row>
@@ -92,6 +107,7 @@
             ...mapState('orchestrateSession', {
                 participants: 'participants',
                 stageNumber: 'stageNumber',
+                participantsThatNeedHelp: 'participantsThatNeedHelp'
             })
         }
     })
