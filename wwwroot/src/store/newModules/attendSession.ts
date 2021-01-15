@@ -4,6 +4,7 @@ import {Id} from "@/models/idType";
 import {targetResultApi} from "@/api/targetResult";
 import {ParticipantTargetResults, TargetResult, TargetResultData} from "@/models/types";
 import {rootIdentifiers} from "@/store/identifiers";
+import { participantApi } from '@/api/participantApi';
 
 const modulePrefix = 'attendSession/'
 
@@ -17,6 +18,7 @@ export const attendSessionIdentifiers = {
         setDisplayName: modulePrefix + 'SET_DISPLAY_NAME',
         updateStageNumber: modulePrefix + 'UPDATE_STAGE_NUMBER',
         sendTargetResult: modulePrefix + 'SEND_TARGET_RESULT',
+        sendHelpRequest: modulePrefix + "SEND_HELP_REQUEST"
     },
     mutations: {
         setParticipantId: modulePrefix + 'SET_PARTICIPANT_ID',
@@ -24,6 +26,7 @@ export const attendSessionIdentifiers = {
         updateStageNumber: modulePrefix + 'UPDATE_STAGE_NUMBER',
         addTargetResult: modulePrefix + 'ADD_TARGET_RESULT',
         removeTargetResult: modulePrefix + 'REMOVE_TARGET_RESULT',
+        toggleHelpRequest: modulePrefix + 'TOGGLE_HELP_REQUEST'
     }
 };
 
@@ -32,13 +35,15 @@ export interface AttendSessionState {
     displayName: string;
     stageNumber: number;
     targetResults: ParticipantTargetResults;
+    helpRequested: boolean;
 }
 
 const state = {
     participantId: null,
     displayName: '',
     stageNumber: 0,
-    targetResults: {} as ParticipantTargetResults
+    targetResults: {} as ParticipantTargetResults,
+    helpRequested: false
 } as AttendSessionState;
 
 const getters = {
@@ -95,6 +100,14 @@ const actions = {
                     dispatch(rootIdentifiers.actions.finishLoading, null, {root: true});
                 });
         }
+    },
+
+    SEND_HELP_REQUEST({rootState, commit})
+    {
+        participantApi.sendHelpRequest(rootState.session.session?.id, rootState.attendSession.participantId)
+            .then(res => {
+                commit(localIdentifier(attendSessionIdentifiers.mutations.toggleHelpRequest))
+            })
     }
 } as ActionTree<AttendSessionState, any>;
 
@@ -122,7 +135,12 @@ const mutations = {
 
     REMOVE_TARGET_RESULT(state, targetResultData: TargetResultData) {
         Vue.delete(state.targetResults, targetResultData.targetId as string);
+    },
+
+    TOGGLE_HELP_REQUEST(state){
+        state.helpRequested != state.helpRequested;
     }
+
 } as MutationTree<AttendSessionState>;
 
 export default {

@@ -17,6 +17,7 @@ export const orchestrateSessionIdentifiers = {
         removeTargetResult: modulePrefix + 'REMOVE_TARGET_RESULT',
         startSession: modulePrefix + 'START_SESSION',
         changeStageNumber: modulePrefix + 'CHANGE_STAGE_NUMBER',
+        updateParticipantsThatNeedHelp: modulePrefix + 'UPDATE_PARTICIPANTS_NEEDING_HELP',
     },
     mutations: {
         addParticipant: modulePrefix + 'ADD_PARTICIPANT',
@@ -25,6 +26,7 @@ export const orchestrateSessionIdentifiers = {
         removeTargetResult: modulePrefix + 'REMOVE_TARGET_RESULT',
         startSession: modulePrefix + 'START_SESSION',
         updateCurrentStageNumber: modulePrefix + 'UPDATE_CURRENT_STAGE_NUMBER',
+        updateParticipantsThatNeedHelp: modulePrefix + 'UPDATE_PARTICIPANTS_NEEDING_HELP',
     }
 };
 
@@ -32,12 +34,14 @@ export interface OrchestrateSessionState {
     participants: { [key: string]: string };
     targetResults: TargetResultCollection;
     stageNumber: number;
+    participantsThatNeedHelp: string[];
 }
 
 const state = {
     participants: {},
     targetResults: {},
     stageNumber: 0,
+    participantsThatNeedHelp: []
 } as OrchestrateSessionState;
 
 const getters = {
@@ -90,6 +94,10 @@ const actions = {
 
     CHANGE_STAGE_NUMBER({commit, state}, change: number) {
         commit(localIdentifier(orchestrateSessionIdentifiers.mutations.updateCurrentStageNumber), state.stageNumber + change);
+    },
+
+    UPDATE_PARTICIPANTS_NEEDING_HELP({commit}, names: string[]){
+        commit(localIdentifier(orchestrateSessionIdentifiers.mutations.updateParticipantsThatNeedHelp), names)
     }
 } as ActionTree<OrchestrateSessionState, any>;
 
@@ -135,6 +143,10 @@ const mutations = {
 
     UPDATE_CURRENT_STAGE_NUMBER(state, currentStage: number) {
         state.stageNumber = currentStage;
+    },
+
+    UPDATE_PARTICIPANTS_NEEDING_HELP(state, names: string[]){
+        state.participantsThatNeedHelp = names;
     }
 } as MutationTree<OrchestrateSessionState>;
 

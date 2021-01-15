@@ -49,6 +49,10 @@ export default function createSignalRPlugin() {
 
         client.on('ParticipantLeftSession', (participantId: string) => {
             store.dispatch(orchestrateSessionIdentifiers.actions.participantLeft, participantId);
+        });
+
+        client.on('UpdateParticipantsThatNeedHelp', (names: string[]) => {
+            store.dispatch(orchestrateSessionIdentifiers.actions.updateParticipantsThatNeedHelp, names);
         })
 
         client.on('ReceiveTargetResult', (targetId: string, participantId: string, success: boolean, details: string) => {
