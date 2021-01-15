@@ -28,7 +28,7 @@
                             >
                                 Ausführung fehlgeschlagen
                             </v-btn>
-                            <v-btn @click="sendHelpRequest()" small outlined color="secondary">
+                            <v-btn @click="sendHelpRequest()" large outlined color="secondary">
                                 Hilfe Anfordern
                             </v-btn>
                         </v-btn-toggle>
