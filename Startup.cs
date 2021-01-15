@@ -103,6 +103,7 @@ namespace ByodLauncher
                                 "http://localhost:8080",
                                 "https://localhost:44369",
                                 "http://localhost:43847",
+                                "http://localhost:8080",
                                 "https://byodlauncher.ch",
                                 "https://www.byodlauncher.ch"
                             )

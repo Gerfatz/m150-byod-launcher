@@ -19,12 +19,12 @@
                     >
                         <v-btn-toggle v-model="targetResultToggleButton">
                             <v-btn @click="sendTargetResult(target.id, true)"
-                                   small outlined color="primary"
+                                   large outlined color="primary"
                             >
                                 Ausführung erfolgreich
                             </v-btn>
                             <v-btn @click="sendTargetResult(target.id, false)"
-                                   small outlined color="primary"
+                                   large outlined color="primary"
                             >
                                 Ausführung fehlgeschlagen
                             </v-btn>
