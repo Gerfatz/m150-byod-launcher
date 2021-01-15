@@ -40,5 +40,5 @@ Desktop.ini
 /secret.local
 /todo.md
 
-
+appsettings.Development.json
 localfileupload
